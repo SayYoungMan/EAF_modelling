@@ -16,6 +16,7 @@ m_sSl = 8000;
 m_gas = 100;
 m_C = 160;
 m_CL = 0;
+m_Fe = 141620;
 m_Si = 240;
 m_Cr = 80;
 m_Mn = 240;
@@ -329,6 +330,14 @@ VF41 = (A1/A4) * VF14;
 % VF43 = (A3/A4) * VF34;
 VF45 = (A5/A4) * VF54;
 
+% ------------------------- Arrays for graph ------------------------
+gas_temp = zeros(1,1000);
+sSc_temp = zeros(1,1000);
+sSl_temp = zeros(1,1000);
+lSc_temp = zeros(1,1000);
+lSl_temp = zeros(1,1000);
+steel_Fe = zeros(1,1000);
+
 for step = 1:1000000
 % ----------------------------- Equations ---------------------------
 % Number of moles of liquid metal
@@ -339,9 +348,11 @@ XM_lSl = (m_lSl/M_lSl) + (m_FeO/M_FeO) + (m_SiO2/M_SiO2) + (m_MnO/M_MnO) ...
     + (m_Cr2O3/M_Cr2O3) + (m_P2O5/M_P2O5) + (m_MgO/M_MgO) + (m_CaO/M_CaO);
 
 XM_gas = (m_O2/M_O2) + (m_CO/M_CO) + (m_CO2/M_CO2) + (m_N2/M_N2);
+
 % Mole fractions
 X_C = (m_C/M_C) / XM_lSc;
 X_Si = (m_Si/M_Si) / XM_lSc;
+X_lSc = (m_lSc/M_Fe) / XM_lSc;
 X_FeO = (m_FeO/M_FeO) / XM_lSl;
 X_CaO = (m_CaO/M_CaO) / XM_lSl;
 X_SiO2 = (m_SiO2/M_SiO2) / XM_lSl;
@@ -721,6 +732,7 @@ m_CO2 = m_CO2 + dm_CO2 * tc;
 m_comb = m_comb + dm_comb * tc;
 m_Cr = m_Cr + dm_Cr * tc;
 m_Cr2O3 = m_Cr2O3 + dm_Cr2O3;
+m_Fe = m_Fe + dm_Fe * tc;
 m_FeO = m_FeO + dm_FeO * tc;
 m_lSc = m_lSc + dm_lSc * tc;
 m_lSl = m_lSl + dm_lSl * tc;
@@ -744,4 +756,30 @@ T_roof = T_roof + dT_roof * tc;
 T_sSc = T_sSc + dT_sSc * tc;
 T_sSl = T_sSl + dT_sSl * tc;
 T_wall = T_wall + dT_wall * tc;
+
+if mod(step, 1000) == 0
+    gas_temp(step/1000) = T_gas;
+    sSc_temp(step/1000) = T_sSc;
+    sSl_temp(step/1000) = T_sSl;
+    lSc_temp(step/1000) = T_lSc;
+    lSl_temp(step/1000) = T_lSl;
+    steel_Fe(step/1000) = X_lSc;
 end
+end
+
+% Graph generation
+time = linspace(1, 1000, 1000);
+
+figure
+plot(time, gas_temp)
+hold on
+plot(time, sSc_temp)
+plot(time, sSl_temp)
+plot(time, lSc_temp)
+plot(time, lSl_temp)
+
+legend('Gas', 'Solid Metal', 'Solid Slag', 'Liquid Metal', 'Liquid Slag')
+hold off
+
+figure
+plot(time, steel_Fe)
