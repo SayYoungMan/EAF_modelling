@@ -56,6 +56,9 @@ T_gas = 800;
 T_wall = 300;
 T_roof = 300;
 
+% Relative Pressure
+rp = 0;
+
 % ------------------------- Variables -----------------------------
 % EAF mass capacity
 m_EAF = 105; % kg
@@ -488,21 +491,27 @@ dm_Fe = x8_d1 + x8_d2 + x8_d3 + x8_d4 + x8_d5 + x8_d6 + x8_d7 + x8_d8;
 % Rate of change of CO
 x9_d1 = -((hd*u1*m_CO)/((k_U*u2+hd)*(m_CO + m_CO2 + m_N2 + m_O2)));
 x9_d2 = -(M_CO/M_C) * (x1_d2 + x2_d1 + x2_d2 + x2_d4);
+x9_d4 = -((k_PR*rp*m_CO)/(m_CO + m_CO2 + m_N2 + m_O2));
 x9_d5 = -2*(M_CO/M_O2) * O2_post * K_mCO;
+dm_CO = x9_d1 + x9_d2 + x9_d4 - x9_d5;
 
 % Rate of change of CO2
 x10_d1 = -(hd*u1*m_CO2) / ((k_U*u2+hd)*(m_CO + m_CO2 + m_N2 + m_O2));
 x10_d3 = 2*(M_CO2/M_O2)*O2_post*K_mCO;
 x10_d4 = (M_CO2/M_CH4)*CH4_inj;
+x10_d7 = -(k_PR*rp*m_CO2) / (m_CO+m_CO2+m_N2+m_O2);
 x10_d8 = -(M_CO2/M_C) * x2_d5;
 
 % Rate of change of N2
 x11_d1 = -(hd*u1*m_N2) / ((k_U*u2+hd)*(m_CO + m_CO2 + m_N2 + m_O2));
+x11_d3 = -(k_PR*rp*m_N2) / (m_CO+m_CO2+m_N2+m_O2);
+dm_N2 = x11_d1 + x11_d3;
 
 % Rate of change of O2
 x12_d1 = -(hd*u1*m_O2) / ((k_U*u2+hd)*(m_CO + m_CO2 + m_N2 + m_O2));
 x12_d4 = O2_post * (1-K_mCO);
 x12_d8 = -(M_O2/M_FeO) * x7_d3;
+
 
 % Electrode Oxidation
 dm_el = 3*(R_tip * (I_arc^2/3600) + R_side * (A_side/3600));
@@ -580,9 +589,13 @@ Q_CH4gas = dH_Tn * (1 - K_burn * (0.35 + 0.65*tanh((1573/T_sSc)-1)));
 
 x10_d5 = (M_CO2/M_C) * dm_el;
 x10_d6 = -9 * (M_CO2/M_C9H20)*dm_comb;
-x12_d3 = -(M_O
+dm_CO2 = x10_d8 + x10_d7 + x10_d6 + x10_d5 + x10_d4 + x10_d3 + x10_d1;
+
+% Rate of change of O2
 x12_d5 = -(M_O2/M_C) * dm_el;
 x12_d6 = -14 * (M_O2/M_C9H20) * dm_comb;
+x12_d7 = -(k_PR*rp*m_O2) / (m_CO+m_CO2+m_N2+m_O2);
+dm_O2 = x12_d8 + x12_d7 + x12_d6 + x12_d5 + x12_d4 + x12_d1;
 
 %% System of equations
 % ------------------------- System of equations ---------------------
@@ -612,17 +625,21 @@ x12_d6 = -14 * (M_O2/M_C9H20) * dm_comb;
 % x(22) = dm_CO2
 % x(23) = x11_d3
 % x(24) = dm_N2
+% x(25) = x12_d7
+% x(26) = dm_O2
+% x(27) = rp
+% x(28) = dH_Th
 
 % Energy balance for the solid steel zone (sSc)
-F(1) = -x(1) + (Q_arc + Q_CH4 + K_post*x(121))*(1-K_sSclSc) + Q_lScsSc ...
+F(1) = -x(1) + (Q_arc + Q_CH4 + K_post*x(28))*(1-K_sSclSc) + Q_lScsSc ...
     - Q_sScsSl - Q_sSclSl - Q_sScgas - Q_sScwater - x(10);
 
 % Energy received by liquid metal zone (lSc)
-F(2) = -x(2) + (Q_arc + Q_CH4 + K_post*x(121))*K_sSclSc + Q_lScchem ...
+F(2) = -x(2) + (Q_arc + Q_CH4 + K_post*x(28))*K_sSclSc + Q_lScchem ...
     - Q_lScsSc - Q_lScsSl - Q_lSclSl - Q_lScgas - Q_lScwater - x(11);
 
 % Gas zone energy balance
-F(3) = -x(3) + Q_arcgas + (1-K_post)*x(121) + Q_CH4gas + Q_sScgas + Q_lScgas ...
+F(3) = -x(3) + Q_arcgas + (1-K_post)*x(28) + Q_CH4gas + Q_sScgas + Q_lScgas ...
     + Q_lSlgas - Q_gaswater;
 
 % Radiative heat transfer from roof
@@ -680,27 +697,16 @@ F(17) = x(17) + (x(1)*(T_sSc/T_melt)) / (lambda_sSc + Cp_sSc*(T_melt - T_sSc));
 % Liquid metal mass rate
 F(18) = x(18) + x(17);
 
-% Rate of change of CO
-F(19) = x(19) + ((k_PR*x(111)*m_CO)/(m_CO + m_CO2 + m_N2 + m_O2));
-F(20) = x(20) - x9_d5 - x(19) - x9_d2 - x9_d1;
 
-% Rate of change of CO2
-F(21) = x(21) + (k_PR*x(111)*m_CO2) / (m_CO+m_CO2+m_N2+m_O2);
-F(22) = x(22) - x10_d8 - x(21) - x10_d6 - x10_d5 - x10_d4 - x10_d3 - x10_d1;
 
-% Rate of change of N2
-F(23) = x(23) + (k_PR*x(111)*m_N2) / (m_CO+m_CO2+m_N2+m_O2);
-F(24) = x(24) - x(23) - x11_d1;
 
-% Rate of change of O2
-F(108) = x(25) + (k_PR*x(111)*m_O2) / (m_CO+m_CO2+m_N2+m_O2);
-F(110) = x(110) - x(25) - x12_d6 - x12_d5 - x12_d4 - x12_d1 - x(24);
+
+
 
 % Relative Pressure
-F(111) = -x(111) + (R*T_gas/V_gas) * (x(20)/M_CO + x(22)/M_CO2 + ...
-    x(24)/M_N2 + x(110)/M_O2) + (R*x(14)/V_gas) * (m_CO/M_CO + m_CO2/M_CO2 ...
+F(27) = -rp + (R*T_gas/V_gas) * (dm_CO/M_CO + dm_CO2/M_CO2 + ...
+    dm_N2/M_N2 + dm_O2/M_O2) + (R*x(14)/V_gas) * (m_CO/M_CO + m_CO2/M_CO2 ...
     + m_N2/M_N2 + m_O2/M_O2);
 
-% h) CO + 1/2O2 -> CO2
-F(121) = x(121) - (x(19)/M_CO) * ((dH_CO2-dH_CO) + (Cp_CO2 - Cp_CO - 0.5*Cp_O2)*(T_gas-298));
+
 end

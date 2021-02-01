@@ -1,6 +1,10 @@
-function F = eaf_improved(x)
-%% Pre-calculation Equations and variables
+clear
+clc
+
 % ---------------------- Initial Conditions -----------------------
+% Time slice
+tc = 1/1000; % 10^-3 s
+
 % Arc Current
 I_arc = 44; % kA
 
@@ -58,6 +62,16 @@ T_roof = 300;
 
 % Relative Pressure
 rp = 0;
+
+% Initial radiative heat flows
+Q_sScRAD = -10000; %kW 
+Q_lScRAD = 0; %kW
+
+% Initial radiosity assumption
+J_roof = -20000;
+J_wall = -7700;
+J_sSc = 110000;
+J_lSc = 240000;
 
 % ------------------------- Variables -----------------------------
 % EAF mass capacity
@@ -235,7 +249,7 @@ M_MgO = 0.04304;
 M_C9H20 = 0.1282;
 M_N2 = 0.028013;
 
-M_lSl = 0.05;
+M_lSl = 0.056;
 
 % ------------------------ Reactor Geometry -----------------------
 % Radius
@@ -590,6 +604,8 @@ Q_CH4 = dH_Tn * K_burn * (0.35 + 0.65*tanh((1573/T_sSc)-1));
 % Energy received from oxygen burners
 Q_CH4gas = dH_Tn * (1 - K_burn * (0.35 + 0.65*tanh((1573/T_sSc)-1)));
 
+% ==================== Dependent Equations =====================
+
 x10_d5 = (M_CO2/M_C) * dm_el;
 x10_d6 = -9 * (M_CO2/M_C9H20)*dm_comb;
 dm_CO2 = x10_d8 + x10_d7 + x10_d6 + x10_d5 + x10_d4 + x10_d3 + x10_d1;
@@ -611,80 +627,83 @@ dT_gas = Q_gas/(m_gas*Cp_gas);
 rp = (R*T_gas/V_gas) * (dm_CO/M_CO + dm_CO2/M_CO2 + dm_N2/M_N2 + dm_O2/M_O2) ...
     + (R*dT_gas/V_gas) * (m_CO/M_CO + m_CO2/M_CO2 + m_N2/M_N2 + m_O2/M_O2);
 
-%% System of equations
-% ------------------------- System of equations ---------------------
-
-% List of variables
-% x(4) = J_roof = J1
-% x(5) = J_wall = J2
-% x(6) = J_sSc = J3
-% x(7) = J_lSc = J4
-% x(8) = Q_roofRAD
-% x(9) = Q_wallRAD
-% x(10) = Q_sScRAD
-% x(11) = Q_lScRAD
-% x(14) = dT_roof
-% x(15) = dT_wall
-
 % Energy balance for the solid steel zone (sSc)
-F(1) = -x(1) + (Q_arc + Q_CH4 + K_post*dH_Th)*(1-K_sSclSc) + Q_lScsSc ...
-    - Q_sScsSl - Q_sSclSl - Q_sScgas - Q_sScwater - x(10);
+Q_sSc = (Q_arc + Q_CH4 + K_post*dH_Th)*(1-K_sSclSc) + Q_lScsSc ...
+    - Q_sScsSl - Q_sSclSl - Q_sScgas - Q_sScwater - Q_sScRAD;
 
 % Energy received by liquid metal zone (lSc)
-F(2) = -x(2) + (Q_arc + Q_CH4 + K_post*dH_Th)*K_sSclSc + Q_lScchem ...
-    - Q_lScsSc - Q_lScsSl - Q_lSclSl - Q_lScgas - Q_lScwater - x(11);
+Q_lSc = (Q_arc + Q_CH4 + K_post*dH_Th)*K_sSclSc + Q_lScchem ...
+    - Q_lScsSc - Q_lScsSl - Q_lSclSl - Q_lScgas - Q_lScwater - Q_lScRAD;
 
-% Radiative heat transfer from roof
-F(4) = x(4) - ep1*sig*T_roof^4 - (1-ep1)*(VF12*x(5) + VF13*x(6) ...
-    + VF14*x(7) + VF15*Q_arcRAD);
+% Temperature change of sSc
+dT_sSc = (Q_sSc*(1-(T_sSc/T_melt))) / (m_sSc*Cp_sSc);
 
-% Radiative heat transfer from wall
-F(5) = x(5) - ep2*sig*T_wall^4 - (1-ep2)*(VF21*x(4) + VF23*x(6) ...
-    + VF24*x(7) + VF25*Q_arcRAD);
+% Temperature change of lSc
+dT_lSc = Q_lSc/(m_lSc*Cp_lSc);
 
-% Radiative heat transfer from Solid Metal
-F(6) = x(6) - ep3*sig*T_sSc^4 - (1-ep3)*(VF31*x(4) + VF32*x(5) ...
+% Melt rate of solid scrap
+dm_sSc = -(Q_sSc*(T_sSc/T_melt)) / (lambda_sSc + Cp_sSc*(T_melt - T_sSc));
+
+% Liquid metal mass rate
+dm_lSc = -dm_sSc;
+
+% Radiosity of roof
+J_roof = ep1*sig*T_roof^4 - (1-ep1)*(VF12*J_wall + VF13*J_sSc ...
+    + VF14*J_lSc + VF15*Q_arcRAD);
+
+% Radiosity of wall
+J_wall = ep2*sig*T_wall^4 - (1-ep2)*(VF21*J_wall + VF23*J_sSc ...
+    + VF24*J_lSc + VF25*Q_arcRAD);
+
+% Radiosity of sSc
+J_sSc = ep3*sig*T_sSc^4 - (1-ep3)*(VF31*J_roof + VF32*J_wall ...
     + VF35*Q_arcRAD);
 
-% Radiative heat transfer from liquid metal
-F(7) = x(7) - ep4*sig*T_lSc^4 - (1-ep4)*(VF41*x(4) + VF42*x(5) ...
+% Radiosity of lSc
+J_lSc = ep4*sig*T_lSc^4 - (1-ep4)*(VF41*J_roof + VF42*J_wall ...
     + VF45*Q_arcRAD);
 
 % Radiative heat flow in roof
-F(8) = -x(8) + A1 * (VF12*(x(4)-x(5)) + VF13*(x(4)-x(6)) ...
-    + VF14*(x(4)-x(7))) - VF51 * Q_arcRAD;
+Q_roofRAD = A1 * (VF12*(J_roof-J_wall) + VF13*(J_roof-J_sSc) ...
+    + VF14*(J_roof-J_lSc)) - VF51 * Q_arcRAD;
 
 % Radiative heat flow in wall
-F(9) = -x(9) + A2 * (VF21*(x(5)-x(4)) + VF23*(x(5)-x(6)) ...
-    + VF24*(x(5)-x(7))) - VF52 * Q_arcRAD;
+Q_wallRAD = A2 * (VF21*(J_wall-J_roof) + VF23*(J_wall-J_sSc) ...
+    + VF24*(J_wall-J_lSc)) - VF52 * Q_arcRAD;
 
 % Radiative heat flow in sSc
-F(10) = -x(10) + A3 * (VF31*(x(6)-x(4)) + VF32*(x(6)-x(5))) ...
+Q_sScRAD = A3 * (VF31*(J_sSc-J_roof) + VF32*(J_sSc-J_wall)) ...
     - VF53 * Q_arcRAD;
 
 % Radiative heat flow in lSc
-F(11) = -x(11) + A4 * (VF41*(x(7)-x(4)) + VF42*(x(7)-x(5))) ...
+Q_lScRAD = A4 * (VF41*(J_lSc-J_roof) + VF42*(J_lSc-J_wall)) ...
     - VF54 * Q_arcRAD;
 
 % Temperature change of sSc
-F(12) = x(12) - (x(1)*(1-(T_sSc/T_melt))) / (m_sSc*Cp_sSc);
+dT_sSc = (Q_sSc*(1-(T_sSc/T_melt))) / (m_sSc*Cp_sSc);
 
 % Temperature change of lSc
-F(13) = x(13) - x(2)/(m_lSc*Cp_lSc);
+dT_lSc = Q_lSc/(m_lSc*Cp_lSc);
 
 % Temperature change of roof
-F(14) = -x(14) + (-x(8) + (A1/(A1+A2))*Q_gaswater - phi1*Cp_H2O*(T_roof - T_water)) ...
+dT_roof = (-Q_roofRAD + (A1/(A1+A2))*Q_gaswater - phi1*Cp_H2O*(T_roof - T_water)) ...
     / (A1*d1*rho*Cp_roof);
 
 % Temperature change of wall
-F(15) = -x(15) + (-x(9) + (A2/(A1+A2))*Q_gaswater - phi2*Cp_H2O*(T_wall - T_water)) ...
+dT_wall = (-Q_wallRAD + (A2/(A1+A2))*Q_gaswater - phi2*Cp_H2O*(T_wall - T_water)) ...
     / (A2*d2*rho*Cp_wall);
 
-% Melt rate of solid scrap
-F(16) = x(16) + (x(1)*(T_sSc/T_melt)) / (lambda_sSc + Cp_sSc*(T_melt - T_sSc));
+% ======================= Update value ============================
+m_CL = m_CL + dm_CL * tc;
+m_C = m_C + (dm_CL + dm_CD) * tc;
+m_CO = m_CO + dm_CO * tc;
+m_CO2 = m_CO2 + dm_CO2 * tc;
+m_comb = m_comb + dm_comb * tc;
+m_Cr = m_Cr + dm_Cr * tc;
+m_Cr2O3 = m_Cr2O3 + dm_Cr2O3;
+m_FeO = m_FeO + dm_FeO * tc;
+m_lSc = m_lSc + dm_lSc * tc;
+m_lSl = m_lSl + dm_lSl * tc;
+m_Mn = m_Mn + dm_Mn * tc;
+m_MnO = m_MnO + dm_MnO * tc;
 
-% Liquid metal mass rate
-F(3) = x(3) + x(16);
-
-
-end
