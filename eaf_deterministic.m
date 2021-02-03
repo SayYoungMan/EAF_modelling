@@ -4,36 +4,46 @@ clc
 % ---------------------- Initial Conditions -----------------------
 % Time slice
 tc = 1/1000; % 10^-3 s
+secs = 2000; % Total operating time in s
 
 % Arc Current
 I_arc = 44; % kA
 
-% Initial Mass (kg)
-m_lSc = 106000;
-m_lSl = 1000;
-m_sSc = 40000;
-m_sSl = 8000;
-m_gas = 100;
-m_C = 160;
-m_CL = 0;
-m_Fe = 141620;
-m_Si = 240;
-m_Cr = 80;
-m_Mn = 240;
-m_P = 20;
-m_FeO = 2700;
-m_SiO2 = 63;
-m_MnO = 10;
-m_Cr2O3 = 10;
-m_P2O5 = 10;
-m_CaO = 1000;
-m_MgO = 170;
-m_CO = 10;
-m_CO2 = 1;
-m_N2 = 10;
-m_O2 = 5;
+% Gas zone volume
+V_gas = 45; % m^3
 
-m_comb = 440;
+% Initial Mass (kg)
+m_scrap = 100000;
+m_DRI = 50000;
+solid_ratio = 0.4;
+m_slag = 10000;
+
+% Initial Mass (kg)
+m_sSc = (m_scrap + m_DRI) * solid_ratio;
+m_lSc = (m_scrap + m_DRI) * (1-solid_ratio);
+m_lSl = m_slag * 0.2;
+m_sSl = m_slag * 0.8;
+m_gas = V_gas * 1.225;
+m_C = m_scrap * 0.004 + m_DRI * 0.0222;
+m_CL = 0;
+m_Fe = m_scrap * 0.9705 + m_DRI * 0.9;
+m_Si = m_scrap * 0.006;
+m_Cr = m_scrap * 0.002;
+m_Mn = m_scrap * 0.006;
+m_P = m_scrap * 0.0005;
+m_FeO = m_Fe * 0.07;
+m_SiO2 = m_slag * 0.007 + m_DRI * 0.05386;
+m_MnO = 0;
+m_Cr2O3 = 0;
+m_P2O5 = 0;
+m_CaO = m_slag * 0.567;
+m_MgO = m_slag * 0.412;
+m_CO = m_gas*0.05;
+m_CO2 = m_gas*0.05;
+m_N2 = m_gas*0.78;
+m_O2 = m_gas*0.21;
+
+m_comb = m_scrap * 0.011;
 
 % C Injection rate kg/s
 C_inj = 10;
@@ -45,14 +55,14 @@ CH4_inj = 0.5;
 O2_lance = 1;
 
 % O2 rate for CO post-combustion kg/s
-O2_post = 0;
-K_mCO = 0;
+O2_post = 1;
+K_mCO = 1;
 
 % DRI Addition rate kg/s
 DRI_add = 1000;
 
 % Initial Temperature
-T_sSc = 1245;
+T_sSc = 1231.27;
 T_lSc = 1800;
 T_sSl = 1245;
 T_lSl = 1800;
@@ -67,11 +77,11 @@ rp = 1;
 Q_sScRAD = -10; %MW 
 Q_lScRAD = 0; %MW
 
-% Initial radiosity assumption
-J_roof = 0.4;
-J_wall = 0.4;
-J_sSc = 110;
-J_lSc = 240;
+% Initial radiosity
+J_roof = 0;
+J_wall = 0;
+J_sSc = 0;
+J_lSc = 0;
 
 % ------------------------- Variables -----------------------------
 % EAF mass capacity
@@ -90,9 +100,6 @@ k_PR = 0.6;
 
 % Universal Gas Constant
 R = 8.314; % J/mol K
-
-% Gas zone volume
-V_gas = 45; % m^3
 
 % Stefan Boltzmann Constant
 sig = 5.67e-08; % W.m-2.K-4s-1
@@ -330,23 +337,46 @@ VF41 = (A1/A4) * VF14;
 % VF43 = (A3/A4) * VF34;
 VF45 = (A5/A4) * VF54;
 
-% ------------------------- Arrays for graph ------------------------
-gas_temp = zeros(1,1000);
-sSc_temp = zeros(1,1000);
-sSl_temp = zeros(1,1000);
-lSc_temp = zeros(1,1000);
-lSl_temp = zeros(1,1000);
-steel_Fe = zeros(1,1000);
+% Custom definition for View factor
+% VF12 = 0;
+% VF13 = 0;
+% VF14 = 0;
+% VF15 = 0;
+% VF21 = 0;
+% VF22 = 0;
+% VF23 = 0;
+% VF24 = 0;
+% VF25 = 0;
+% VF31 = 0;
+% VF32 = 0;
+% VF34 = 0;
+% VF35 = 0;
+% VF41 = 0;
+% VF42 = 0;
+% VF45 = 0;
+% VF51 = 0;
+% VF52 = 0;
+% VF53 = 0;
+% VF54 = 0;
 
-for step = 1:1000000
+
+% ------------------------- Arrays for graph ------------------------
+gas_temp = zeros(1,secs);
+sSc_temp = zeros(1,secs);
+sSl_temp = zeros(1,secs);
+lSc_temp = zeros(1,secs);
+lSl_temp = zeros(1,secs);
+steel_Fe = zeros(1,secs);
+
+for step = 1:secs/tc
 % ----------------------------- Equations ---------------------------
-% Number of moles of liquid metal
+% Number of moles of liquid metal (mol)
 XM_lSc = (m_lSc/M_Fe) + (m_C/M_C) + (m_Si/M_Si) + (m_Cr/M_Cr) + ...
     (m_Mn/M_Mn) + (m_P / M_P);
-% Number of moles in liquid slag zones
+% Number of moles in liquid slag zones (mol)
 XM_lSl = (m_lSl/M_lSl) + (m_FeO/M_FeO) + (m_SiO2/M_SiO2) + (m_MnO/M_MnO) ...
     + (m_Cr2O3/M_Cr2O3) + (m_P2O5/M_P2O5) + (m_MgO/M_MgO) + (m_CaO/M_CaO);
-
+% Number of moles in gas zone (mol)
 XM_gas = (m_O2/M_O2) + (m_CO/M_CO) + (m_CO2/M_CO2) + (m_N2/M_N2);
 
 % Mole fractions
@@ -381,34 +411,34 @@ Xeq_Cr = X_Cr2O3 / (X_FeO * kX_Cr);
 Xeq_P = sqrt(X_P2O5 / (X_FeO^5 * X_CaO^3 * kX_P));
 
 % ------------------- Heat Flows ----------------------
-% Energy dissipated from the arcs by conduction
+% Energy dissipated from the arcs by conduction (MW)
 Q_arc = 0.2 * P_arc;
 
-% Energy flow between the solid and liquid crap zones
+% Energy flow between the solid and liquid crap zones (MW)
 Q_lScsSc = min([m_lSc, m_sSc]) * K_therm1 * K_area1 * (T_lSc - T_sSc) / 1000;
 
-% Energy flow between solid scrap and solid slag
+% Energy flow between solid scrap and solid slag (MW)
 Q_sScsSl = min([m_sSc, m_sSl]) * K_therm2 * K_area2 * (T_sSc - T_sSl) / 1000;
 
-% Energy flow between solid scrap and liquid slag
+% Energy flow between solid scrap and liquid slag (MW)
 Q_sSclSl = min([m_sSc, m_lSl]) * K_therm3 * K_area3 * (T_sSc - T_lSl) / 1000;
 
-% Energy exchanged between the solid scrap and surrounding gas
+% Energy exchanged between the solid scrap and surrounding gas (MW)
 Q_sScgas = (m_sSc/m_EAF) * K_therm4 * (T_sSc-T_gas) * (1-K_sSclSc) / 1000;
 
 % Portion of solid steel energy lost due to cooling of the furnace walls
 Q_sScwater = K_water1 * (T_sSc - T_wall) * (T_sSc/T_melt) * (1 - exp(-(m_sSc/m_EAF))) / 1000;
 
-% Energy exchange between liquid metal and solid slag
+% Energy exchange between liquid metal and solid slag (MW)
 Q_lScsSl = min([m_lSc, m_sSl]) * K_therm5 * K_area5 * (T_lSc - T_sSl) / 1000;
 
-% Energy exchange between liquid metal and liquid slag
+% Energy exchange between liquid metal and liquid slag (MW)
 Q_lSclSl = min([m_lSc, m_lSl]) * K_therm6 * K_area6 * (T_lSc - T_lSl) / 1000;
 
-% Energy exchanged between the liquid metal and surrounding gas
+% Energy exchanged between the liquid metal and surrounding gas (MW)
 Q_lScgas = (m_lSc/m_EAF) * K_therm7 * (T_lSc - T_gas) * K_sSclSc / 1000;
 
-% Energy loss in liquid metal zone due to cooling
+% Energy loss in liquid metal zone due to cooling (MW)
 Q_lScwater = K_water2 * (T_lSc - T_wall) * (T_lSc/T_melt) * (1 - exp(-(m_lSc/m_EAF))) / 1000;
 
 % Energy loss in solid slag due to cooling
@@ -655,8 +685,8 @@ Q_gas = Q_arcgas + (1-K_post)*dH_Th + Q_CH4gas + Q_sScgas + Q_lScgas ...
 dT_gas = Q_gas/(m_gas*Cp_gas);
 
 % Relative Pressure
-% rp = (R*T_gas/V_gas) * (dm_CO/M_CO + dm_CO2/M_CO2 + dm_N2/M_N2 + dm_O2/M_O2) * tc ...
-%     + (R*dT_gas*tc/V_gas) * (m_CO/M_CO + m_CO2/M_CO2 + m_N2/M_N2 + m_O2/M_O2);
+dp = (R*T_gas/V_gas) * (dm_CO/M_CO + dm_CO2/M_CO2 + dm_N2/M_N2 + dm_O2/M_O2) * tc ...
+    + (R*dT_gas*tc/V_gas) * (m_CO/M_CO + m_CO2/M_CO2 + m_N2/M_N2 + m_O2/M_O2);
 
 % Energy balance for the solid steel zone (sSc)
 Q_sSc = (Q_arc + Q_CH4 + K_post*dH_Th)*(1-K_sSclSc) + Q_lScsSc ...
@@ -679,20 +709,20 @@ dm_sSc = -(Q_sSc*(T_sSc/T_melt)) / (lambda_sSc + Cp_sSc*(T_melt - T_sSc));
 dm_lSc = -dm_sSc;
 
 % Radiosity of roof
-J_roof = (ep1*sig*T_roof^4 - (1-ep1)*(VF12*J_wall + VF13*J_sSc ...
-    + VF14*J_lSc + VF15*Q_arcRAD)) / 1000;
+J_roof = (ep1*sig*T_roof^4/10e+6 - (1-ep1)*(VF12*J_wall + VF13*J_sSc ...
+    + VF14*J_lSc + VF15*Q_arcRAD));
 
 % Radiosity of wall
-J_wall = (ep2*sig*T_wall^4 - (1-ep2)*(VF21*J_wall + VF23*J_sSc ...
-    + VF24*J_lSc + VF25*Q_arcRAD)) / 1000;
+J_wall = (ep2*sig*T_wall^4/10e+6 - (1-ep2)*(VF21*J_wall + VF23*J_sSc ...
+    + VF24*J_lSc + VF25*Q_arcRAD));
 
 % Radiosity of sSc
-J_sSc = (ep3*sig*T_sSc^4 - (1-ep3)*(VF31*J_roof + VF32*J_wall ...
-    + VF35*Q_arcRAD)) / 1000;
+J_sSc = (ep3*sig*T_sSc^4/10e+6 - (1-ep3)*(VF31*J_roof + VF32*J_wall ...
+    + VF35*Q_arcRAD));
 
 % Radiosity of lSc
-J_lSc = (ep4*sig*T_lSc^4 - (1-ep4)*(VF41*J_roof + VF42*J_wall ...
-    + VF45*Q_arcRAD)) / 1000;
+J_lSc = (ep4*sig*T_lSc^4/10e+6 - (1-ep4)*(VF41*J_roof + VF42*J_wall ...
+    + VF45*Q_arcRAD));
 
 % Radiative heat flow in roof
 Q_roofRAD = A1 * (VF12*(J_roof-J_wall) + VF13*(J_roof-J_sSc) ...
@@ -757,18 +787,20 @@ T_sSc = T_sSc + dT_sSc * tc;
 T_sSl = T_sSl + dT_sSl * tc;
 T_wall = T_wall + dT_wall * tc;
 
-if mod(step, 1000) == 0
-    gas_temp(step/1000) = T_gas;
-    sSc_temp(step/1000) = T_sSc;
-    sSl_temp(step/1000) = T_sSl;
-    lSc_temp(step/1000) = T_lSc;
-    lSl_temp(step/1000) = T_lSl;
-    steel_Fe(step/1000) = X_lSc;
+rp = rp + dp * tc;
+
+if mod(step, 1/tc) == 0
+    gas_temp(step*tc) = T_gas;
+    sSc_temp(step*tc) = T_sSc;
+    sSl_temp(step*tc) = T_sSl;
+    lSc_temp(step*tc) = T_lSc;
+    lSl_temp(step*tc) = T_lSl;
+    steel_Fe(step*tc) = X_lSc;
 end
 end
 
 % Graph generation
-time = linspace(1, 1000, 1000);
+time = linspace(1, secs, secs);
 
 figure
 plot(time, gas_temp)
