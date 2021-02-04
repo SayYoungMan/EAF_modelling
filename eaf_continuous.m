@@ -1,10 +1,38 @@
 clear
 clc
 
-% ---------------------- Initial Conditions -----------------------
+% -------------------------- Controller ---------------------------
 % Time slice
 tc = 1/1000; % 10^-3 s
-secs = 0.001; % Total operating time in s
+secs = 15000; % Total operating time in s
+
+% DRI Addition rate kg/s
+DRI_add = 100;
+scr_add = 10;
+slg_add = 1;
+
+% Feed Temperature K
+DRI_temp = 1231.27;
+scr_temp = 500;
+slg_temp = 300;
+O2_temp = 300;
+
+% O2 addition rate kg/s
+O2_add = 5;
+
+% O2 lance rate kg/s
+O2_lance = O2_add * 0.5;
+
+% O2 rate for CO post-combustion kg/s
+O2_post = O2_add * 0.2;
+
+% EAF mass capacity
+m_EAF = 200000; % kg
+
+% Arc Power kW
+P_arc = 70000;
+
+% ---------------------- Initial Conditions -----------------------
 
 % Arc Current
 I_arc = 44; % kA
@@ -12,70 +40,63 @@ I_arc = 44; % kA
 % Gas zone volume
 V_gas = 45; % m^3
 
+% Initially start with molten scrap and continuously add DRI
 % Initial Mass (kg)
-m_scrap = 25000;
-m_DRI = 95000;
-solid_ratio = 0.1;
-m_slag = 5000;
+m_sSc = 32500;
+m_lSc = 7500;
+m_scrap = m_sSc + m_lSc;
 
-% Initial Mass (kg)
-m_sSc = (m_scrap + m_DRI);
-m_lSc = 1;
-m_lSl = m_slag * 0.2;
-m_sSl = m_slag * 0.8;
+m_lSl = 800;
+m_sSl = 200;
+m_slag = m_lSl + m_sSl;
+
 m_gas = V_gas * 1.225;
-m_C = m_scrap * 0.004 + m_DRI * 0.0222;
+
+m_C = m_scrap * 0.004;
 m_CL = 0;
-m_Fe = m_scrap * 0.9705 + m_DRI * 0.9;
+m_Fe = m_scrap * 0.9705;
 m_Si = m_scrap * 0.006;
 m_Cr = m_scrap * 0.002;
 m_Mn = m_scrap * 0.006;
 m_P = m_scrap * 0.0005;
-m_FeO = m_Fe * 0.001;
-m_SiO2 = m_slag * 0.007 + m_DRI * 0.05386;
-m_MnO = 0.1;
-m_Cr2O3 = 0.1;
+m_FeO = m_Fe * 0.0001;
+m_SiO2 = m_slag * 0.007;
+m_MnO = 1;
+m_Cr2O3 = 1;
 m_P2O5 = 1;
+m_Al2O3 = m_slag * 0.0045;
+
 m_CaO = m_slag * 0.567;
 m_MgO = m_slag * 0.412;
-m_CO = m_gas*0.05;
-m_CO2 = m_gas*0.05;
+
+m_CO = m_gas*0.005;
+m_CO2 = m_gas*0.005;
 m_N2 = m_gas*0.78;
 m_O2 = m_gas*0.21;
 
-m_comb = m_scrap * 0.001;
+m_comb = m_scrap * 0.011;
 
 % C Injection rate kg/s
-C_inj = 5;
+C_inj = 0.1;
 
 % Oxygen burner rate kg/s
-CH4_inj = 0.1;
-
-% O2 lance rate kg/s
-O2_lance = 1;
-
-% O2 rate for CO post-combustion kg/s
-O2_post = 0.4;
-K_mCO = m_CO / (m_CO+m_CO2);
-
-% DRI Addition rate kg/s
-DRI_add = 0;
+CH4_inj = 0;
 
 % Initial Temperature
-T_sSc = 1231.27;
+T_sSc = 1050;
 T_lSc = 1800;
-T_sSl = 1245;
+T_sSl = 950;
 T_lSl = 1800;
-T_gas = 800;
-T_wall = 300;
-T_roof = 300;
+T_gas = 2000;
+T_wall = 308;
+T_roof = 321;
 
 % Relative Pressure
-rp = 1;
+rp = 0;
 
 % Initial radiative heat flows
-Q_sScRAD = 0; %kW 
-Q_lScRAD = 0; %kW
+Q_sScRAD = -24000; %kW 
+Q_lScRAD = -1000; %kW
 
 % Initial radiosity
 J_roof = 0;
@@ -84,12 +105,8 @@ J_sSc = 0;
 J_lSc = 0;
 
 % ------------------------- Variables -----------------------------
-% EAF mass capacity
-m_EAF = 105000; % kg
+% Post combustion efficiency
 K_post = 0.7;
-
-% Arc Power kW
-P_arc = 30000;
 
 % ------------------------- Constants -----------------------------
 % Dimensionless constant for approximation
@@ -121,8 +138,8 @@ d1 = 0.3;
 d2 = 0.45;
 
 % Water flow rates kg/s
-phi1 = 60;
-phi2 = 130;
+phi1 = 80;
+phi2 = 160;
 
 % Heat transfer coeffs kW/m^2K
 K_therm1 = 0.2;
@@ -256,9 +273,10 @@ M_MgO = 0.04304;
 M_C9H20 = 0.1282;
 M_N2 = 0.028013;
 M_gas = 0.35;
+M_Al2O3 = 0.10196;
 
-M_sSl = 0.056;
-M_lSl = 0.056;
+M_sSl = 0.0606;
+M_lSl = 0.0606;
 
 % ------------------------ Reactor Geometry -----------------------
 % Radius
@@ -291,7 +309,7 @@ hd = 0;
 % Approximation of off-gas mass flowrate
 u1 = 15; % kg/s
 % Slip-gap width
-u2 = 0.3; % m
+u2 = 0; % m
 
 % ---------------------- View Factor Equations --------------------
 K_sSclSc = 0.5 * tanh(5*(h_bath-h_scrap+h_cone)) + 0.5;
@@ -325,10 +343,10 @@ R3 = r_eafout/L3;
 R34 = r_eafin/L3;
 S3 = 1 + (1+R34^2)/(R3^2);
 
-% VF51 = (A1/A5) * VF15;
-% VF52 = (A2/A5) * VF25;
-% VF53 = (1-VF51-VF52) * K_sSclSc;
-% VF54 = (1-VF51-VF52) * (1-K_sSclSc);
+VF51 = (A1/A5) * VF15;
+VF52 = (A2/A5) * VF25;
+VF53 = (1-VF51-VF52) * K_sSclSc;
+VF54 = (1-VF51-VF52) * (1-K_sSclSc);
 
 VF31 = VF13;
 VF32 = VF12;
@@ -337,7 +355,7 @@ VF35 = 1 - VF31 - VF32 - VF34;
 
 VF41 = (A1/A4) * VF14;
 % VF43 = (A3/A4) * VF34;
-% VF45 = (A5/A4) * VF54;
+VF45 = (A5/A4) * VF54;
 
 % Custom definition for View factor
 % VF12 = 0;
@@ -355,29 +373,54 @@ VF41 = (A1/A4) * VF14;
 % VF35 = 0;
 % VF41 = 0;
 % VF42 = 0;
-VF45 = 0.2;
-VF51 = 0.1;
-VF52 = 0.2;
-VF53 = 0.3;
-VF54 = 0.4;
-
+% VF45 = 0.2;
+% VF51 = 0.1;
+% VF52 = 0.2;
+% VF53 = 0.3;
+% VF54 = 0.4;
 
 % ------------------------- Arrays for graph ------------------------
-% gas_temp = zeros(1,secs);
-% sSc_temp = zeros(1,secs);
-% sSl_temp = zeros(1,secs);
-% lSc_temp = zeros(1,secs);
-% lSl_temp = zeros(1,secs);
-% steel_Fe = zeros(1,secs);
+gas_temp = zeros(1,secs);
+sSc_temp = zeros(1,secs);
+sSl_temp = zeros(1,secs);
+lSc_temp = zeros(1,secs);
+lSl_temp = zeros(1,secs);
+steel_Fe = zeros(1,secs);
+m_solid = zeros(1,secs);
+m_liquid = zeros(1,secs);
+m_solid_slag = zeros(1,secs);
+m_liquid_slag = zeros(1,secs);
 
 for step = 1:secs/tc
+% ------------------------- Material Addition -----------------------
+DRI = DRI_add * tc; % kg
+scr = scr_add * tc; % kg
+slg = slg_add * tc; % kg
+
+T_sSc = (T_sSc * m_sSc + DRI_temp * DRI + scr_temp * scr) / (m_sSc + DRI + scr);
+T_sSl = (T_sSl * m_sSl + slg_temp * slg) / (m_sSl + slg);
+T_gas = (T_gas * m_gas + T_air * (O2_lance + O2_post) * tc) / (m_gas + (O2_lance + O2_post) * tc);
+
+m_sSc = m_sSc + DRI + scr;
+m_sSl = m_sSl + slg;
+
+m_Fe = m_Fe + (DRI * 0.897) + (scr * 0.9705);
+m_C = m_C + (DRI * 0.00475) + (scr * 0.004);
+m_Al2O3 = m_Al2O3 + (DRI * 0.0375);
+m_SiO2 = m_SiO2 + (DRI * 0.0577);
+m_Si = m_Si + (scr * 0.006);
+m_Cr = m_Cr + (scr * 0.002);
+m_P = m_P + (scr * 0.0005);
+m_Mn = m_Mn + (scr * 0.006);
+m_comb = m_comb + (scr * 0.011);
+    
 % ----------------------------- Equations ---------------------------
 % Number of moles of liquid metal (mol)
-XM_lSc = (m_lSc/M_Fe) + (m_C/M_C) + (m_Si/M_Si) + (m_Cr/M_Cr) + ...
+XM_lSc = (m_Fe/M_Fe) + (m_C/M_C) + (m_Si/M_Si) + (m_Cr/M_Cr) + ...
     (m_Mn/M_Mn) + (m_P / M_P);
 % Number of moles in liquid slag zones (mol)
 XM_lSl = (m_lSl/M_lSl) + (m_FeO/M_FeO) + (m_SiO2/M_SiO2) + (m_MnO/M_MnO) ...
-    + (m_Cr2O3/M_Cr2O3) + (m_P2O5/M_P2O5) + (m_MgO/M_MgO) + (m_CaO/M_CaO);
+    + (m_Cr2O3/M_Cr2O3) + (m_P2O5/M_P2O5) + (m_MgO/M_MgO) + (m_CaO/M_CaO) + (m_Al2O3/M_Al2O3);
 % Number of moles in gas zone (mol)
 XM_gas = (m_O2/M_O2) + (m_CO/M_CO) + (m_CO2/M_CO2) + (m_N2/M_N2);
 
@@ -396,9 +439,13 @@ X_P2O5 = (m_P2O5/M_P2O5) / XM_lSl;
 X_Cr = (m_Cr/M_Cr) / XM_lSc;
 X_P = (m_P/M_P) / XM_lSc;
 X_CO = (m_CO/M_CO) / XM_gas;
+X_N2 = (m_N2/M_N2) / XM_gas;
+X_O2 = (m_O2/M_O2) / XM_gas;
+X_CO2 = (m_CO2/M_CO2) / XM_gas;
+X_comb = (m_comb/M_C9H20) / XM_lSc;
 
 kX_Si = 8.08e-08;
-kX_MnO1 = 10;
+kX_MnO1 = X_Mn/X_MnO;
 kX_MnO2 = 10^(2.8*((X_CaO+X_MgO)/X_SiO2)-1.16) * (M_MnO^2 * M_Si * M_Fe) / (M_Mn^2 * M_lSl * M_SiO2);
 kX_Mn = 189.3;
 kX_Cr = 0.3 * ((M_Cr*M_FeO*100) / (M_Cr2O3*M_Fe));
@@ -407,12 +454,14 @@ kX_P = 7800;
 Xeq_C = 4.9e-4 / X_FeO;
 Xeq_Si = kX_Si / (X_FeO^2);
 Xeq_MnO1 = X_Mn/kX_MnO1;
-% Xeq_MnO2 = sqrt((X_Mn^2*X_SiO2)/(X_Si*kX_MnO2));
-Xeq_MnO2 = 0.0001;
+Xeq_MnO2 = sqrt((X_Mn^2*X_SiO2)/(X_Si*kX_MnO2));
+% Xeq_MnO2 = 0.0001;
 Xeq_Mn = X_MnO / (X_FeO * kX_Mn);
 Xeq_Cr = X_Cr2O3 / (X_FeO * kX_Cr);
 % Xeq_P = sqrt(X_P2O5 / (X_FeO^5 * X_CaO^3 * kX_P));
 Xeq_P = 0.0001;
+    
+K_mCO = m_CO / (m_CO+m_CO2);
 
 % ------------------- Heat Flows ----------------------
 % Energy dissipated from the arcs by conduction (kW)
@@ -491,18 +540,27 @@ x1_d3 = -(m_CL*T_lSc*Cp_lSc*(T_air/T_melt)) / (lambda_C + Cp_C*(T_melt-T_air));
 dm_CL = x1_d1 + x1_d2 + x1_d3;
 
 % Rate of dissolved C in bath
+% Dissolved C decarburization
 x2_d1 = -kd_CD*(X_C - Xeq_C); % kg/s
-% Should be kg^2/s^2
+% Dissolved C oxidation to CO (Should be kg^2/s^2)
 x2_d2 = -kd_C1*(X_C - Xeq_C) * O2_lance * K_O2CO;
+% Dissolving of injected C
 x2_d3 = -x1_d3;
+% Reaction with MnO
 x2_d4 = -kd_Mn1*(M_C/M_MnO)*(X_MnO - Xeq_MnO1); % kg/s
+% Dissolved C oxidation to CO2
 x2_d5 = -kd_C2 * (X_C - Xeq_C) * O2_lance * K_O2CO2;
+% Rate of change of C in bath
 dm_CD = x2_d1 + x2_d2 + x2_d3 + x2_d4 + x2_d5;
 
 % Rate of change of Si
+% Si desiliconization
 x3_d1 = -kd_Si1 * (X_Si - Xeq_Si);
+% Si Oxidation to SiO2
 x3_d2 = -kd_Si2 * (X_Si - Xeq_Si) * O2_lance * K_O2SiO2;
+% Si reaction with MnO
 x3_d3 = -kd_Mn2 * (M_Si/M_MnO) * (X_MnO - Xeq_MnO2);
+
 dm_Si = x3_d1 + x3_d2 + x3_d3;
 
 % Rate of change of Mn
@@ -554,35 +612,30 @@ x8_d8 = -(5/2) * (M_Fe/M_P) * dm_P;
 dm_Fe = x8_d1 + x8_d2 + x8_d3 + x8_d4 + x8_d5 + x8_d6 + x8_d7 + x8_d8;
 
 % Rate of change of CO
-x9_d1 = -((hd*u1*m_CO)/((k_U*u2+hd)*(m_CO + m_CO2 + m_N2 + m_O2)));
+% x9_d1 = -((hd*u1*m_CO)/((k_U*u2+hd)*(m_CO + m_CO2 + m_N2 + m_O2)));
 x9_d2 = -(M_CO/M_C) * (x1_d2 + x2_d1 + x2_d2 + x2_d4);
-x9_d3 = 2 * M_CO * k_air1 * k_PR * rp;
-x9_d4 = -((k_PR*rp*m_CO)/(m_CO + m_CO2 + m_N2 + m_O2));
+% x9_d3 = 2 * M_CO * k_air1 * k_PR * rp;
+% x9_d4 = -((k_PR*rp*m_CO)/(m_CO + m_CO2 + m_N2 + m_O2));
 x9_d5 = -2*(M_CO/M_O2) * O2_post * K_mCO;
-if rp > 0
-    dm_CO = x9_d1 + x9_d2 + x9_d4 + x9_d5;
-else
-    dm_CO = x9_d1 + x9_d2 + x9_d3 + x9_d5;
-end
+dm_CO = x9_d2 + x9_d5;
 
 % Rate of change of CO2
-x10_d1 = -(hd*u1*m_CO2) / ((k_U*u2+hd)*(m_CO + m_CO2 + m_N2 + m_O2));
-x10_d2 = 2*M_CO2*k_air1*k_PR*rp;
+% x10_d1 = -(hd*u1*m_CO2) / ((k_U*u2+hd)*(m_CO + m_CO2 + m_N2 + m_O2));
+% x10_d2 = 2*M_CO2*k_air1*k_PR*rp;
 x10_d3 = 2*(M_CO2/M_O2)*O2_post*K_mCO;
 x10_d4 = (M_CO2/M_CH4)*CH4_inj;
-x10_d7 = -(k_PR*rp*m_CO2) / (m_CO+m_CO2+m_N2+m_O2);
+% x10_d7 = -(k_PR*rp*m_CO2) / (m_CO+m_CO2+m_N2+m_O2);
 x10_d8 = -(M_CO2/M_C) * x2_d5;
 
 % Rate of change of N2
-x11_d1 = -(hd*u1*m_N2) / ((k_U*u2+hd)*(m_CO + m_CO2 + m_N2 + m_O2));
-x11_d3 = -(k_PR*rp*m_N2) / (m_CO+m_CO2+m_N2+m_O2);
-dm_N2 = x11_d1 + x11_d3;
+% x11_d1 = -(hd*u1*m_N2) / ((k_U*u2+hd)*(m_CO + m_CO2 + m_N2 + m_O2));
+% x11_d3 = -(k_PR*rp*m_N2) / (m_CO+m_CO2+m_N2+m_O2);
+dm_N2 = 0;
 
 % Rate of change of O2
-x12_d1 = -(hd*u1*m_O2) / ((k_U*u2+hd)*(m_CO + m_CO2 + m_N2 + m_O2));
+% x12_d1 = -(hd*u1*m_O2) / ((k_U*u2+hd)*(m_CO + m_CO2 + m_N2 + m_O2));
 x12_d4 = O2_post * (1-K_mCO);
 x12_d8 = -(M_O2/M_FeO) * x7_d3;
-
 
 % Electrode Oxidation
 dm_el = 3*(R_tip * (I_arc^2/3600) + R_side * (A_side/3600));
@@ -620,7 +673,7 @@ dH_Tf = (dm_P/M_P) * (dH_P2O5 - 5*dH_FeO - 2*dH_PS + ...
 dH_Tg = (x2_d2/M_C) * ((dH_CO-dH_CS) + (Cp_CO - Cp_C - 0.5*Cp_O2)*(T_lSc-298));
 
 % h) CO + 1/2O2 -> CO2
-dH_Th = (x9_d4/M_CO) * ((dH_CO2-dH_CO) + (Cp_CO2 - Cp_CO - 0.5*Cp_O2)*(T_gas-298));
+dH_Th = (x9_d5/M_CO) * ((dH_CO2-dH_CO) + (Cp_CO2 - Cp_CO - 0.5*Cp_O2)*(T_gas-298));
 
 % i) C + O2 -> CO2
 dH_Ti = (x2_d5/M_C) * ((dH_CO2-dH_CS) + (Cp_CO2 - Cp_C - Cp_O2)*(T_lSc-298));
@@ -666,23 +719,15 @@ Q_CH4gas = dH_Tn * (1 - K_burn * (0.35 + 0.65*tanh((1573/T_sSc)-1)));
 
 x10_d5 = (M_CO2/M_C) * dm_el;
 x10_d6 = -9 * (M_CO2/M_C9H20)*dm_comb;
-if rp > 0
-    dm_CO2 = x10_d8 + x10_d7 + x10_d6 + x10_d5 + x10_d4 + x10_d3 + x10_d1;
-else
-    dm_CO2 = x10_d8 + x10_d2 + x10_d6 + x10_d5 + x10_d4 + x10_d3 + x10_d1;
-end
+dm_CO2 = x10_d8 + x10_d6 + x10_d5 + x10_d4 + x10_d3;
 
 % Rate of change of O2
-x12_d2 = -M_O2 * k_air1 * k_PR * rp;
-x12_d3 = -(M_O2/(2*M_CO2)) * x10_d2;
+% x12_d2 = -M_O2 * k_air1 * k_PR * rp;
+% x12_d3 = -(M_O2/(2*M_CO2)) * x10_d2;
 x12_d5 = -(M_O2/M_C) * dm_el;
 x12_d6 = -14 * (M_O2/M_C9H20) * dm_comb;
-x12_d7 = -(k_PR*rp*m_O2) / (m_CO+m_CO2+m_N2+m_O2);
-if rp > 0
-    dm_O2 = x12_d8 + x12_d7 + x12_d6 + x12_d5 + x12_d4 + x12_d3 + x12_d1;
-else
-    dm_O2 = x12_d8 + x12_d2 + x12_d6 + x12_d5 + x12_d4 + x12_d3 + x12_d1;
-end
+% x12_d7 = -(k_PR*rp*m_O2) / (m_CO+m_CO2+m_N2+m_O2);
+dm_O2 = x12_d8 + x12_d6 + x12_d5 + x12_d4 + O2_add;
 
 % Gas zone energy balance
 Q_gas = Q_arcgas + (1-K_post)*dH_Th + Q_CH4gas + Q_sScgas + Q_lScgas ...
@@ -780,7 +825,7 @@ m_gas = m_gas + dm_gas * tc;
 m_Si = m_Si + dm_Si * tc;
 m_SiO2 = m_SiO2 + dm_SiO2 * tc;
 
-T_gas = T_gas + dT_gas * tc;
+T_gas = ((T_gas + dT_gas * tc)*m_gas + (O2_temp * O2_add * tc)) / (m_gas + O2_add * tc);
 T_lSc = T_lSc + dT_lSc * tc;
 T_lSl = T_lSl + dT_lSl * tc;
 T_roof = T_roof + dT_roof * tc;
@@ -790,36 +835,73 @@ T_wall = T_wall + dT_wall * tc;
 
 % rp = rp + dp * tc;
 
+% ----------------------------- Take out -----------------------------
+if XM_gas > 2000
+    gas_out = XM_gas - 2000;
+    N2_out = gas_out * X_N2;
+    CO2_out = gas_out * X_CO2;
+    CO_out = gas_out * X_CO;
+    O2_out = gas_out * X_O2;
+    
+    m_gas = m_gas - gas_out;
+    m_N2 = m_N2 - N2_out;
+    m_CO2 = m_CO2 - CO2_out;
+    m_CO = m_CO - CO_out;
+    m_O2 = m_O2 - O2_out;
+end
+
+if mod(step, 600000) == 0
+    lSc_out = m_lSc * 0.5;
+    m_lSc = m_lSc - lSc_out;
+    m_Fe = m_Fe - lSc_out * X_Fe;
+    m_Si = m_Si - lSc_out * X_Si;
+    m_Cr = m_Cr - lSc_out * X_Cr;
+    m_Mn = m_Mn - lSc_out * X_Mn;
+    m_comb = m_comb - lSc_out * X_comb;
+    m_P = m_P - lSc_out * X_P;
+end 
+
+
+% ----------------------- Variables to display -----------------------
+X_Fe = m_Fe / (m_Fe + m_Si + m_Cr + m_Mn + m_comb + m_P + m_Al2O3*0.1);
+
 if mod(step, 1/tc) == 0
     gas_temp(step*tc) = T_gas;
     sSc_temp(step*tc) = T_sSc;
     sSl_temp(step*tc) = T_sSl;
     lSc_temp(step*tc) = T_lSc;
     lSl_temp(step*tc) = T_lSl;
-    steel_Fe(step*tc) = X_lSc;
-end
-
-if T_gas > 2000
-    CH4_inj = 0;
-else
-    CH4_inj = 0.1;
+    steel_Fe(step*tc) = X_Fe;
+    m_solid(step*tc) = m_sSc;
+    m_liquid(step*tc) = m_lSc;
+    m_solid_slag(step*tc) = m_sSl;
+    m_liquid_slag(step*tc) = m_lSl;
 end
 
 end
 
 % Graph generation
-% time = linspace(1, secs, secs);
-% 
-% figure
-% plot(time, gas_temp)
-% hold on
-% plot(time, sSc_temp)
-% plot(time, sSl_temp)
-% plot(time, lSc_temp)
-% plot(time, lSl_temp)
-% 
-% legend('Gas', 'Solid Metal', 'Solid Slag', 'Liquid Metal', 'Liquid Slag')
-% hold off
-% 
-% figure
-% plot(time, steel_Fe)
+time = linspace(1, secs, secs);
+
+figure
+plot(time, gas_temp)
+hold on
+plot(time, sSc_temp)
+plot(time, sSl_temp)
+plot(time, lSc_temp)
+plot(time, lSl_temp)
+
+legend('Gas', 'Solid Metal', 'Solid Slag', 'Liquid Metal', 'Liquid Slag')
+hold off
+
+figure
+plot(time, steel_Fe)
+
+figure
+plot(time, m_solid)
+hold on
+plot(time, m_liquid)
+plot(time, m_solid_slag)
+plot(time, m_liquid_slag)
+legend('solid', 'liquid', 'solid slag', 'liquid slag')
+hold off
