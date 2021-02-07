@@ -4,33 +4,33 @@ clc
 % -------------------------- Controller ---------------------------
 % Time slice
 tc = 1/1000; % 10^-3 s
-secs = 15000; % Total operating time in s
+secs = 600; % Total operating time in s
 
 % DRI Addition rate kg/s
-DRI_add = 100;
-scr_add = 10;
-slg_add = 1;
+DRI_add = 85.8536;
+scr_add = 30.5556;
+slg_add = 5;
 
 % Feed Temperature K
-DRI_temp = 1231.27;
+DRI_temp = 1245.15;
 scr_temp = 500;
 slg_temp = 300;
 O2_temp = 300;
 
 % O2 addition rate kg/s
-O2_add = 5;
+O2_add = 3;
 
 % O2 lance rate kg/s
-O2_lance = O2_add * 0.5;
+O2_lance = O2_add * 0.7;
 
 % O2 rate for CO post-combustion kg/s
-O2_post = O2_add * 0.2;
+O2_post = O2_add * 0.3;
 
 % EAF mass capacity
 m_EAF = 200000; % kg
 
 % Arc Power kW
-P_arc = 70000;
+P_arc = 90000;
 
 % ---------------------- Initial Conditions -----------------------
 
@@ -42,12 +42,12 @@ V_gas = 45; % m^3
 
 % Initially start with molten scrap and continuously add DRI
 % Initial Mass (kg)
-m_sSc = 32500;
-m_lSc = 7500;
+m_sSc = 3250;
+m_lSc = 750;
 m_scrap = m_sSc + m_lSc;
 
-m_lSl = 800;
-m_sSl = 200;
+m_lSl = 80;
+m_sSl = 20;
 m_slag = m_lSl + m_sSl;
 
 m_gas = V_gas * 1.225;
@@ -87,7 +87,7 @@ T_sSc = 1050;
 T_lSc = 1800;
 T_sSl = 950;
 T_lSl = 1800;
-T_gas = 2000;
+T_gas = 298;
 T_wall = 308;
 T_roof = 321;
 
@@ -404,45 +404,79 @@ T_gas = (T_gas * m_gas + T_air * (O2_lance + O2_post) * tc) / (m_gas + (O2_lance
 m_sSc = m_sSc + DRI + scr;
 m_sSl = m_sSl + slg;
 
-m_Fe = m_Fe + (DRI * 0.897) + (scr * 0.9705);
-m_C = m_C + (DRI * 0.00475) + (scr * 0.004);
-m_Al2O3 = m_Al2O3 + (DRI * 0.0375);
-m_SiO2 = m_SiO2 + (DRI * 0.0577);
+m_Fe = m_Fe + (DRI * 0.8943) + (scr * 0.9705);
+m_C = m_C + (DRI * 0.0075) + (scr * 0.004);
+m_Al2O3 = m_Al2O3 + (DRI * 0.0374);
+m_SiO2 = m_SiO2 + (DRI * 0.0576);
 m_Si = m_Si + (scr * 0.006);
 m_Cr = m_Cr + (scr * 0.002);
 m_P = m_P + (scr * 0.0005);
 m_Mn = m_Mn + (scr * 0.006);
 m_comb = m_comb + (scr * 0.011);
+
+m_Al2O3 = m_Al2O3 + slg * 0.005;
+m_CaO = m_CaO + slg * 0.570;
+m_MgO = m_MgO + slg * 0.415;
+m_SiO2 = m_SiO2 + slg * 0.01;
     
 % ----------------------------- Equations ---------------------------
 % Number of moles of liquid metal (mol)
 XM_lSc = (m_Fe/M_Fe) + (m_C/M_C) + (m_Si/M_Si) + (m_Cr/M_Cr) + ...
-    (m_Mn/M_Mn) + (m_P / M_P);
+    (m_Mn/M_Mn) + (m_P / M_P) + (m_comb / M_C9H20);
 % Number of moles in liquid slag zones (mol)
-XM_lSl = (m_lSl/M_lSl) + (m_FeO/M_FeO) + (m_SiO2/M_SiO2) + (m_MnO/M_MnO) ...
-    + (m_Cr2O3/M_Cr2O3) + (m_P2O5/M_P2O5) + (m_MgO/M_MgO) + (m_CaO/M_CaO) + (m_Al2O3/M_Al2O3);
+XM_lSl = (m_FeO/M_FeO) + (m_SiO2/M_SiO2) + (m_MnO/M_MnO) + (m_Al2O3/M_Al2O3) ...
+    + (m_Cr2O3/M_Cr2O3) + (m_P2O5/M_P2O5) + (m_MgO/M_MgO) + (m_CaO/M_CaO);
 % Number of moles in gas zone (mol)
 XM_gas = (m_O2/M_O2) + (m_CO/M_CO) + (m_CO2/M_CO2) + (m_N2/M_N2);
 
+% Total mass
+total_mSl = m_FeO + m_CaO + m_SiO2 + m_MnO + m_Cr2O3 + m_P2O5 + m_MgO + m_Al2O3;
+
+MX_FeO = m_FeO / total_mSl;
+MX_CaO = m_CaO / total_mSl;
+MX_SiO2 = m_SiO2 / total_mSl;
+MX_MnO = m_MnO / total_mSl;
+MX_Cr2O3 = m_Cr2O3 / total_mSl;
+MX_P2O5 = m_P2O5 / total_mSl;
+MX_MgO = m_MgO / total_mSl;
+MX_Al2O3 = m_Al2O3 / total_mSl;
+
+total_mSc = m_Fe + m_C + m_Si + m_P + m_Cr + m_Mn + m_comb;
+
+MX_Fe = m_Fe / total_mSc;
+MX_C = m_C / total_mSc;
+MX_Si = m_Si / total_mSc;
+MX_P = m_P / total_mSc;
+MX_Cr = m_Cr / total_mSc;
+MX_Mn = m_Mn / total_mSc;
+MX_comb = m_comb / total_mSc;
+
 % Mole fractions
+
+% Metal
 X_C = (m_C/M_C) / XM_lSc;
 X_Si = (m_Si/M_Si) / XM_lSc;
-X_lSc = (m_lSc/M_Fe) / XM_lSc;
+X_Fe = (m_Fe/M_Fe) /XM_lSc;
+X_comb = (m_comb/M_C9H20) / XM_lSc;
+X_Cr = (m_Cr/M_Cr) / XM_lSc;
+X_P = (m_P/M_P) / XM_lSc;
+X_Mn = (m_Mn/M_Mn) / XM_lSc;
+
+% Slag
 X_FeO = (m_FeO/M_FeO) / XM_lSl;
 X_CaO = (m_CaO/M_CaO) / XM_lSl;
 X_SiO2 = (m_SiO2/M_SiO2) / XM_lSl;
-X_MgO = (m_MgO/M_MgO) / XM_lSl;
-X_Mn = (m_Mn/M_Mn) / XM_lSc;
 X_MnO = (m_MnO/M_MnO) / XM_lSl;
 X_Cr2O3 = (m_Cr2O3/M_Cr2O3) / XM_lSl;
 X_P2O5 = (m_P2O5/M_P2O5) / XM_lSl;
-X_Cr = (m_Cr/M_Cr) / XM_lSc;
-X_P = (m_P/M_P) / XM_lSc;
+X_MgO = (m_MgO/M_MgO) / XM_lSl;
+X_Al2O3 = (m_Al2O3/M_Al2O3) / XM_lSl;
+
+% Gas
 X_CO = (m_CO/M_CO) / XM_gas;
 X_N2 = (m_N2/M_N2) / XM_gas;
 X_O2 = (m_O2/M_O2) / XM_gas;
 X_CO2 = (m_CO2/M_CO2) / XM_gas;
-X_comb = (m_comb/M_C9H20) / XM_lSc;
 
 kX_Si = 8.08e-08;
 kX_MnO1 = X_Mn/X_MnO;
@@ -455,13 +489,12 @@ Xeq_C = 4.9e-4 / X_FeO;
 Xeq_Si = kX_Si / (X_FeO^2);
 Xeq_MnO1 = X_Mn/kX_MnO1;
 Xeq_MnO2 = sqrt((X_Mn^2*X_SiO2)/(X_Si*kX_MnO2));
-% Xeq_MnO2 = 0.0001;
 Xeq_Mn = X_MnO / (X_FeO * kX_Mn);
 Xeq_Cr = X_Cr2O3 / (X_FeO * kX_Cr);
 % Xeq_P = sqrt(X_P2O5 / (X_FeO^5 * X_CaO^3 * kX_P));
 Xeq_P = 0.0001;
     
-K_mCO = m_CO / (m_CO+m_CO2);
+K_mCO = m_CO / m_CO2; % To be replaced with proper rate equation
 
 % ------------------- Heat Flows ----------------------
 % Energy dissipated from the arcs by conduction (kW)
@@ -634,7 +667,7 @@ dm_N2 = 0;
 
 % Rate of change of O2
 % x12_d1 = -(hd*u1*m_O2) / ((k_U*u2+hd)*(m_CO + m_CO2 + m_N2 + m_O2));
-x12_d4 = O2_post * (1-K_mCO);
+% x12_d4 = O2_post * (1-K_mCO);
 x12_d8 = -(M_O2/M_FeO) * x7_d3;
 
 % Electrode Oxidation
@@ -727,7 +760,7 @@ dm_CO2 = x10_d8 + x10_d6 + x10_d5 + x10_d4 + x10_d3;
 x12_d5 = -(M_O2/M_C) * dm_el;
 x12_d6 = -14 * (M_O2/M_C9H20) * dm_comb;
 % x12_d7 = -(k_PR*rp*m_O2) / (m_CO+m_CO2+m_N2+m_O2);
-dm_O2 = x12_d8 + x12_d6 + x12_d5 + x12_d4 + O2_add;
+dm_O2 = x12_d8 + x12_d6 + x12_d5 + O2_add;
 
 % Gas zone energy balance
 Q_gas = Q_arcgas + (1-K_post)*dH_Th + Q_CH4gas + Q_sScgas + Q_lScgas ...
@@ -836,8 +869,10 @@ T_wall = T_wall + dT_wall * tc;
 % rp = rp + dp * tc;
 
 % ----------------------------- Take out -----------------------------
-if XM_gas > 2000
-    gas_out = XM_gas - 2000;
+thres_gas = (121590*V_gas) / (R * T_gas);
+
+if XM_gas > thres_gas
+    gas_out = XM_gas - thres_gas;
     N2_out = gas_out * X_N2;
     CO2_out = gas_out * X_CO2;
     CO_out = gas_out * X_CO;
@@ -851,6 +886,7 @@ if XM_gas > 2000
 end
 
 if mod(step, 600000) == 0
+    % Take out liquid metal
     lSc_out = m_lSc * 0.5;
     m_lSc = m_lSc - lSc_out;
     m_Fe = m_Fe - lSc_out * X_Fe;
@@ -859,6 +895,18 @@ if mod(step, 600000) == 0
     m_Mn = m_Mn - lSc_out * X_Mn;
     m_comb = m_comb - lSc_out * X_comb;
     m_P = m_P - lSc_out * X_P;
+    
+    % Take out liquid slag
+    lSl_out = m_lSl * 0.5;
+    m_lSl = m_lSl - lSl_out;
+    m_Al2O3 = m_Al2O3 - lSl_out * X_Al2O3;
+    m_CaO = m_CaO - lSl_out * X_CaO;
+    m_Cr2O3 = m_Cr2O3 - lSl_out * X_Cr2O3;
+    m_FeO = m_FeO - lSl_out * X_FeO;
+    m_MgO = m_MgO - lSl_out * X_MgO;
+    m_MnO = m_MnO - lSl_out * X_MnO;
+    m_P2O5 = m_P2O5 - lSl_out * X_P2O5;
+    m_SiO2 = m_SiO2 - lSl_out * X_SiO2;
 end 
 
 
