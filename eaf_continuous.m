@@ -4,7 +4,7 @@ clc
 % -------------------------- Controller ---------------------------
 % Time slice
 tc = 1/1000; % 10^-3 s
-secs = 600; % Total operating time in s
+secs = 0.001; % Total operating time in s
 
 % DRI Addition rate kg/s
 DRI_add = 85.8536;
@@ -380,16 +380,16 @@ VF45 = (A5/A4) * VF54;
 % VF54 = 0.4;
 
 % ------------------------- Arrays for graph ------------------------
-gas_temp = zeros(1,secs);
-sSc_temp = zeros(1,secs);
-sSl_temp = zeros(1,secs);
-lSc_temp = zeros(1,secs);
-lSl_temp = zeros(1,secs);
-steel_Fe = zeros(1,secs);
-m_solid = zeros(1,secs);
-m_liquid = zeros(1,secs);
-m_solid_slag = zeros(1,secs);
-m_liquid_slag = zeros(1,secs);
+% gas_temp = zeros(1,secs);
+% sSc_temp = zeros(1,secs);
+% sSl_temp = zeros(1,secs);
+% lSc_temp = zeros(1,secs);
+% lSl_temp = zeros(1,secs);
+% steel_Fe = zeros(1,secs);
+% m_solid = zeros(1,secs);
+% m_liquid = zeros(1,secs);
+% m_solid_slag = zeros(1,secs);
+% m_liquid_slag = zeros(1,secs);
 
 for step = 1:secs/tc
 % ------------------------- Material Addition -----------------------
@@ -931,25 +931,25 @@ end
 % Graph generation
 time = linspace(1, secs, secs);
 
-figure
-plot(time, gas_temp)
-hold on
-plot(time, sSc_temp)
-plot(time, sSl_temp)
-plot(time, lSc_temp)
-plot(time, lSl_temp)
-
-legend('Gas', 'Solid Metal', 'Solid Slag', 'Liquid Metal', 'Liquid Slag')
-hold off
-
-figure
-plot(time, steel_Fe)
-
-figure
-plot(time, m_solid)
-hold on
-plot(time, m_liquid)
-plot(time, m_solid_slag)
-plot(time, m_liquid_slag)
-legend('solid', 'liquid', 'solid slag', 'liquid slag')
-hold off
+% figure
+% plot(time, gas_temp)
+% hold on
+% plot(time, sSc_temp)
+% plot(time, sSl_temp)
+% plot(time, lSc_temp)
+% plot(time, lSl_temp)
+% 
+% legend('Gas', 'Solid Metal', 'Solid Slag', 'Liquid Metal', 'Liquid Slag')
+% hold off
+% 
+% figure
+% plot(time, steel_Fe)
+% 
+% figure
+% plot(time, m_solid)
+% hold on
+% plot(time, m_liquid)
+% plot(time, m_solid_slag)
+% plot(time, m_liquid_slag)
+% legend('solid', 'liquid', 'solid slag', 'liquid slag')
+% hold off
