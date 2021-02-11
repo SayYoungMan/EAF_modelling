@@ -9,7 +9,7 @@ clc
 ts = 1/1000; % 10^-3 s
 
 % Total operating time in s
-secs = 0.1;
+secs = 10;
 
 % ---------- DRI Settings -----------
 
@@ -78,6 +78,9 @@ C_inj = 0.4;
 % Oxygen Lance Rate (kg/s)
 O2_lance = 8;
 
+% O2 for post combustion (kg/s)
+O2_post = 2;
+
 % Power of arc (kW)
 P_arc = 80000;
 
@@ -95,18 +98,18 @@ rho = 7000;
 % ------------- Initial mass (kg) --------------
 
 % Solid metal initial mass
-m_Fe_sSc = 950;
-m_C_sSc = 10;
-m_Cr_sSc = 5;
-m_Mn_sSc = 5;
-m_P_sSc = 5;
+m_Fe_sSc = 48525;
+m_C_sSc = 200;
+m_Cr_sSc = 100;
+m_Mn_sSc = 300;
+m_P_sSc = 25;
 m_SiO2_sSc = 20;
 m_Al2O3_sSc = 20;
 m_CaO_sSc = 5;
 m_MgO_sSc = 5;
 m_MnO_sSc = 5;
-m_Si_sSc = 10;
-m_comb_sSc = 10;
+m_Si_sSc = 300;
+m_comb_sSc = 550;
 
 m_sSc = m_Fe_sSc + m_C_sSc + m_Cr_sSc + m_Mn_sSc + m_P_sSc + m_SiO2_sSc + ...
     m_Al2O3_sSc + m_CaO_sSc + m_MgO_sSc + m_MnO_sSc + m_Si_sSc + m_comb_sSc;
@@ -122,10 +125,10 @@ m_Si_lSc = 15;
 m_lSc = m_Fe_lSc + m_C_lSc + m_Cr_lSc + m_Mn_lSc + m_P_lSc + m_Si_lSc;
 
 % Solid slag initial mass
-m_CaO_sSl = 20;
-m_MgO_sSl = 20;
-m_SiO2_sSl = 20;
-m_Al2O3_sSl = 10;
+m_CaO_sSl = 567;
+m_MgO_sSl = 412;
+m_SiO2_sSl = 7;
+m_Al2O3_sSl = 14;
 
 % Liquid slag initial mass
 m_SiO2_lSl = 10;
@@ -151,9 +154,9 @@ m_CL = 0;
 
 % ------------- Initial temp. (K) --------------
 
-T_sSc = 1200;
+T_sSc = 1300;
 T_lSc = 1850;
-T_sSl = 1000;
+T_sSl = 800;
 T_lSl = 1850;
 T_gas = 1200;
 T_wall = 300;
@@ -344,8 +347,8 @@ K_O2FeO = 0.75;
 K_O2SiO2 = 0.035;
 
 % Cooling water flowrate
-phi1 = 10;
-phi2 = 5;
+phi1 = 60;
+phi2 = 130;
 
 for step = 1:secs/ts
     
@@ -642,6 +645,14 @@ for step = 1:secs/ts
     
     r_comb = (kd_comb * m_comb_sSc * (T_sSc/T_melt)) / M_C9H20;
     
+    % ----------- Pose Combustion ------------
+    
+    % CO + 1/2O2 -> CO2
+    
+    K_mCO = 0.9;
+    
+    r_post = (O2_post * K_mCO) / M_O2;
+    
     % =================== Reaction Heat Transfer ====================
     
     % ------------ Dynamic heat capacity calculation ----------
@@ -689,8 +700,8 @@ for step = 1:secs/ts
     % g) C + 1/2O2 -> CO
     dH_Tg = r_C_hO2 * ((dH_CO-dH_CS) + (Cp_CO - Cp_C - 0.5*Cp_O2)*(T_lSc-298));
 
-%     % h) CO + 1/2O2 -> CO2
-%     dH_Th = r_CO_hO2 * ((dH_CO2-dH_CO) + (Cp_CO2 - Cp_CO - 0.5*Cp_O2)*(T_gas-298));
+    % h) CO + 1/2O2 -> CO2
+    dH_Th = r_post * ((dH_CO2-dH_CO) + (Cp_CO2 - Cp_CO - 0.5*Cp_O2)*(T_gas-298));
 
     % i) C + O2 -> CO2
     dH_Ti = r_C_O2 * ((dH_CO2-dH_CS) + (Cp_CO2 - Cp_C - Cp_O2)*(T_lSc-298));
@@ -922,9 +933,13 @@ for step = 1:secs/ts
     VF_35 = VF_53 * (A513/A3);
     VF_45 = VF_54 * (A513/A4);
     
+    % VF_12 Roof -> Wall
+    VF_12 = 1 - VF_13 - VF_14 - VF_15;
+    
+    % VF_21 Wall -> Roof
+    VF_21 = VF_12 * (A1/A2);
+    
     % Neglected
-    VF_12 = 0; % small due to low temp.
-    VF_21 = 0;
     VF_34 = 0; % dominated by conduction
     VF_43 = 0;
     
@@ -966,17 +981,17 @@ for step = 1:secs/ts
     
     % ====================== Total Heat Flow =====================
     
-    Q_lScchem = dH_Ta + dH_Tb + dH_Tc + dH_Td + dH_Te + dH_Tf + dH_Tg ...
-    + dH_Ti + dH_Tj + dH_Tk + dH_Tl + dH_Tm + dH_Tp;
+    Q_lScchem = (dH_Ta + dH_Tb + dH_Tc + dH_Td + dH_Te + dH_Tf + dH_Tg ...
+    + dH_Ti + dH_Tj + dH_Tk + dH_Tl + dH_Tm + dH_Tp) / 1000;
     
     % Net heat flow in solid steel zone (sSc)
     % CO post combustion and Oxygen burner neglected
-    Q_sSc = (Q_arc)*(1-K_sSclSc) + Q_lScsSc ...
+    Q_sSc = (Q_arc + dH_Th)*(1-K_sSclSc) + Q_lScsSc ...
         - Q_sScsSl - Q_sSclSl - Q_sScgas - Q_sScwater - Q_sScRAD;
     
     % Net heat flow in liquid metal zone (lSc)
     % CO post combustion and Oxygen burner neglected
-    Q_lSc = (Q_arc)*K_sSclSc + Q_lScchem ...
+    Q_lSc = (Q_arc + dH_Th)*K_sSclSc - Q_lScchem ...
         - Q_lScsSc - Q_lScsSl - Q_lSclSl - Q_lScgas - Q_lScwater - Q_lScRAD;
     
     % Net heat flow in solid slag zone
@@ -1014,6 +1029,13 @@ for step = 1:secs/ts
     dT_wall = (-Q_wallRAD + (A2/(A1+A2))*Q_gaswater - phi2*Cp_H2O*(T_wall - T_water)) ...
         / (A2*d2*rho*Cp_wall);
     
+    T_sSc = T_sSc + dT_sSc * ts;
+    T_lSc = T_lSc + dT_lSc * ts;
+    T_sSl = T_sSl + dT_sSl * ts;
+    T_lSl = T_lSl + dT_lSl * ts;
+    T_roof = T_roof + dT_roof * ts;
+    T_wall = T_wall + dT_wall * ts;
+    
     % ======================= Phase Change =======================
     
     % Injected Carbon Dissolve Rate
@@ -1022,10 +1044,44 @@ for step = 1:secs/ts
         (lambda_C + Cp_C * (T_melt - T_air));
     
     % Melt rate of solid metal (kg/s)
-    dm_sSc = -((Q_sSc*(T_sSc/T_melt)) / (lambda_sSc + Cp_sSc*(T_melt - T_sSc))) * M_Fe;
+    dm_sSc = ((Q_sSc*(T_sSc/T_melt)) / (lambda_sSc + Cp_sSc*(T_melt - T_sSc))) * M_Fe;
+    
+    m_Cr_sSc = m_Cr_sSc - (dm_sSc*X_Cr_sSc*ts);
+    m_Cr_lSc = m_Cr_lSc + (dm_sSc*X_Cr_sSc*ts);
+    m_Fe_sSc = m_Fe_sSc - (dm_sSc*X_Fe_sSc*ts);
+    m_Fe_lSc = m_Fe_lSc + (dm_sSc*X_Fe_sSc*ts);
+    m_Mn_sSc = m_Mn_sSc - (dm_sSc*X_Mn_sSc*ts);
+    m_Mn_lSc = m_Mn_lSc + (dm_sSc*X_Mn_sSc*ts);
+    m_P_sSc = m_P_sSc - (dm_sSc*X_P_sSc*ts);
+    m_P_lSc = m_P_lSc + (dm_sSc*X_P_sSc*ts);
+    m_Si_sSc = m_Si_sSc - (dm_sSc*X_Si_sSc*ts);
+    m_Si_lSc = m_Si_lSc + (dm_sSc*X_Si_sSc*ts);
+    m_C_sSc = m_C_sSc - (dm_sSc*X_C_sSc*ts);
+    m_C_lSc = m_C_lSc + (dm_sSc*X_C_sSc*ts);
+    m_Al2O3_sSc = m_Al2O3_sSc - (dm_sSc*X_Al2O3_sSc*ts);
+    m_Al2O3_lSl = m_Al2O3_lSl + (dm_sSc*X_Al2O3_sSc*ts);
+    m_CaO_sSc = m_CaO_sSc - (dm_sSc*X_CaO_sSc*ts);
+    m_CaO_lSl = m_CaO_lSl + (dm_sSc*X_CaO_sSc*ts);
+    m_SiO2_sSc = m_SiO2_sSc - (dm_sSc*X_SiO2_sSc*ts);
+    m_SiO2_lSl = m_SiO2_lSl + (dm_sSc*X_SiO2_sSc*ts);
+    m_MgO_sSc = m_MgO_sSc - (dm_sSc*X_CaO_sSc*ts);
+    m_MgO_lSl = m_MgO_lSl + (dm_sSc*X_CaO_sSc*ts);
     
     % Melt rate of solid slag (kg/s)
-    dm_sSl = -(Q_sSl*(T_sSl/T_melt)) / ((lambda_sSl + Cp_sSl*(T_melt - T_sSl))/M_sSl);
+    dm_sSl = (Q_sSl*(T_sSl/T_melt)) / ((lambda_sSl + Cp_sSl*(T_melt - T_sSl))/M_sSl);
+    
+    m_Al2O3_sSl = m_Al2O3_sSl - (dm_sSl*X_Al2O3_sSl*ts);
+    m_Al2O3_lSl = m_Al2O3_lSl + (dm_sSl*X_Al2O3_sSl*ts);
+    m_CaO_sSl = m_CaO_sSl - (dm_sSl*X_CaO_sSl*ts);
+    m_CaO_lSl = m_CaO_lSl + (dm_sSl*X_CaO_sSl*ts);
+    m_MgO_sSl = m_MgO_sSl - (dm_sSl*X_MgO_sSl*ts);
+    m_MgO_lSl = m_MgO_lSl + (dm_sSl*X_MgO_sSl*ts);
+    m_SiO2_sSl = m_SiO2_sSl - (dm_sSl*X_SiO2_sSl*ts);
+    m_SiO2_lSl = m_SiO2_lSl + (dm_sSl*X_SiO2_sSl*ts);
+    
+    % ===================== Geometry Change ======================
+    
+    
     
     % =================== Reaction Mass Change ===================
     
@@ -1142,6 +1198,14 @@ for step = 1:secs/ts
     m_comb_sSc = m_comb_sSc - (r_comb * M_C9H20 * ts);
     m_CO = m_CO + 9*(r_comb * M_CO2 * ts);
     m_H2O = m_H2O + 10*(r_comb * M_H2O * ts);
+    
+    % ----------- Pose Combustion ------------
+    
+    % CO + 1/2O2 -> CO2
+    
+    m_O2 = m_O2 + (O2_post - r_post*M_O2) * ts;
+    m_CO = m_CO - 2*(r_post * M_CO * ts);
+    m_CO2 = m_CO2 + 2*(r_post * M_CO * ts);
     
     % ======================= Material Addition ======================
     
