@@ -4,7 +4,7 @@ clc
 % -------------------------- Controller ---------------------------
 % Time slice
 tc = 1/1000; % 10^-3 s
-secs = 0.001; % Total operating time in s
+secs = 10000; % Total operating time in s
 
 % DRI Addition rate kg/s
 DRI_add = 85.8536;
@@ -30,7 +30,7 @@ O2_post = O2_add * 0.3;
 m_EAF = 200000; % kg
 
 % Arc Power kW
-P_arc = 90000;
+P_arc = 50000;
 
 % ---------------------- Initial Conditions -----------------------
 
@@ -42,8 +42,8 @@ V_gas = 45; % m^3
 
 % Initially start with molten scrap and continuously add DRI
 % Initial Mass (kg)
-m_sSc = 3250;
-m_lSc = 750;
+m_sSc = 2000;
+m_lSc = 15000;
 m_scrap = m_sSc + m_lSc;
 
 m_lSl = 80;
@@ -54,7 +54,7 @@ m_gas = V_gas * 1.225;
 
 m_C = m_scrap * 0.004;
 m_CL = 0;
-m_Fe = m_scrap * 0.9705;
+m_Fe = m_scrap * 0.981;
 m_Si = m_scrap * 0.006;
 m_Cr = m_scrap * 0.002;
 m_Mn = m_scrap * 0.006;
@@ -74,7 +74,7 @@ m_CO2 = m_gas*0.005;
 m_N2 = m_gas*0.78;
 m_O2 = m_gas*0.21;
 
-m_comb = m_scrap * 0.011;
+m_comb = m_scrap*0.005;
 
 % C Injection rate kg/s
 C_inj = 0.1;
@@ -312,84 +312,93 @@ u1 = 15; % kg/s
 u2 = 0; % m
 
 % ---------------------- View Factor Equations --------------------
-K_sSclSc = 0.5 * tanh(5*(h_bath-h_scrap+h_cone)) + 0.5;
-ratio = (r_eafout^2*pi) / (r_eafin^2*pi);
-r1 = r_eafout/h_wall;
-rho1 = (sqrt(4*r1^2 + 1) - 1) / r1;
-
-L = h_eafup + h_eaflow;
-R1 = r_eafout/L;
-R4 = r_eafin/L;
-S1 = 1 + (1+R4^2)/(R1^2);
-
-VF12 = (rho1/(2*r1))/2;
-VF13 = (1 - (rho1/(2*r1)))/2;
-VF14 = (1/2)*(S1 - sqrt(S1^2 - 4*(r_eafout/r_eafin)^2))/2;
-VF15 = 1 - VF12 - VF13 - VF14;
-
-R2 = r_eafout/r_eafin;
-H2 = h_wall/r_eafin;
-
-
-VF21 = (rho1/4)/ratio;
-VF22 = 1 - (rho1/2);
-VF23 = (rho1/4)/ratio;
-VF42 = (1/2) * (1-R2^2-H2^2 + sqrt((1+R2^2+H2^2)^2 - 4*R2^2));
-VF24 = (A4/A2)*VF42;
-VF25 = 1 - VF21 - VF22 - VF23 - VF24;
-
-L3 = h_eaflow;
-R3 = r_eafout/L3;
-R34 = r_eafin/L3;
-S3 = 1 + (1+R34^2)/(R3^2);
-
-VF51 = (A1/A5) * VF15;
-VF52 = (A2/A5) * VF25;
-VF53 = (1-VF51-VF52) * K_sSclSc;
-VF54 = (1-VF51-VF52) * (1-K_sSclSc);
-
-VF31 = VF13;
-VF32 = VF12;
-VF34 = (1/2)*(S3 - sqrt(S3^2 - 4*(r_eafout/ratio/r_eafin)^2))/ratio;
-VF35 = 1 - VF31 - VF32 - VF34;
-
-VF41 = (A1/A4) * VF14;
+% K_sSclSc = 0.5 * tanh(5*(h_bath-h_scrap+h_cone)) + 0.5;
+% ratio = (r_eafout^2*pi) / (r_eafin^2*pi);
+% r1 = r_eafout/h_wall;
+% rho1 = (sqrt(4*r1^2 + 1) - 1) / r1;
+% 
+% L = h_eafup + h_eaflow;
+% R1 = r_eafout/L;
+% R4 = r_eafin/L;
+% S1 = 1 + (1+R4^2)/(R1^2);
+% 
+% VF12 = (rho1/(2*r1))/2;
+% VF13 = (1 - (rho1/(2*r1)))/2;
+% VF14 = (1/2)*(S1 - sqrt(S1^2 - 4*(r_eafout/r_eafin)^2))/2;
+% VF15 = 1 - VF12 - VF13 - VF14;
+% 
+% R2 = r_eafout/r_eafin;
+% H2 = h_wall/r_eafin;
+% 
+% 
+% VF21 = (rho1/4)/ratio;
+% VF22 = 1 - (rho1/2);
+% VF23 = (rho1/4)/ratio;
+% VF42 = (1/2) * (1-R2^2-H2^2 + sqrt((1+R2^2+H2^2)^2 - 4*R2^2));
+% VF24 = (A4/A2)*VF42;
+% VF25 = 1 - VF21 - VF22 - VF23 - VF24;
+% 
+% L3 = h_eaflow;
+% R3 = r_eafout/L3;
+% R34 = r_eafin/L3;
+% S3 = 1 + (1+R34^2)/(R3^2);
+% 
+% VF51 = (A1/A5) * VF15;
+% VF52 = (A2/A5) * VF25;
+% VF53 = (1-VF51-VF52) * K_sSclSc;
+% VF54 = (1-VF51-VF52) * (1-K_sSclSc);
+% 
+% VF31 = VF13;
+% VF32 = VF12;
+% VF34 = (1/2)*(S3 - sqrt(S3^2 - 4*(r_eafout/ratio/r_eafin)^2))/ratio;
+% VF35 = 1 - VF31 - VF32 - VF34;
+% 
+% VF41 = (A1/A4) * VF14;
 % VF43 = (A3/A4) * VF34;
-VF45 = (A5/A4) * VF54;
+% VF45 = (A5/A4) * VF54;
 
 % Custom definition for View factor
-% VF12 = 0;
-% VF13 = 0;
-% VF14 = 0;
-% VF15 = 0;
-% VF21 = 0;
-% VF22 = 0;
-% VF23 = 0;
-% VF24 = 0;
-% VF25 = 0;
-% VF31 = 0;
-% VF32 = 0;
-% VF34 = 0;
-% VF35 = 0;
-% VF41 = 0;
-% VF42 = 0;
-% VF45 = 0.2;
-% VF51 = 0.1;
-% VF52 = 0.2;
-% VF53 = 0.3;
-% VF54 = 0.4;
+VF12 = 0.65;
+VF13 = 0.05;
+VF14 = 0.2;
+VF15 = 0.05;
+VF21 = 0.25;
+VF22 = 0;
+VF23 = 0.05;
+VF24 = 0.15;
+VF25 = 0;
+VF31 = 0.05;
+VF32 = 0.1;
+VF34 = 0;
+VF35 = 0;
+VF41 = 0.25;
+VF42 = 0.2;
+VF45 = 0.2;
+VF51 = 0.08;
+VF52 = 0.24;
+if m_sSc/m_lSc < 0.2
+    VF53 = 0.22;
+    VF54 = 0.4;
+    K_sSclSc = 0.8;
+else
+    VF53 = 0.82;
+    VF54 = 0;
+    K_sSclSc = 0;
+end
+
+
 
 % ------------------------- Arrays for graph ------------------------
-% gas_temp = zeros(1,secs);
-% sSc_temp = zeros(1,secs);
-% sSl_temp = zeros(1,secs);
-% lSc_temp = zeros(1,secs);
-% lSl_temp = zeros(1,secs);
-% steel_Fe = zeros(1,secs);
-% m_solid = zeros(1,secs);
-% m_liquid = zeros(1,secs);
-% m_solid_slag = zeros(1,secs);
-% m_liquid_slag = zeros(1,secs);
+gas_temp = zeros(1,secs);
+sSc_temp = zeros(1,secs);
+sSl_temp = zeros(1,secs);
+lSc_temp = zeros(1,secs);
+lSl_temp = zeros(1,secs);
+steel_Fe = zeros(1,secs);
+m_solid = zeros(1,secs);
+m_liquid = zeros(1,secs);
+m_solid_slag = zeros(1,secs);
+m_liquid_slag = zeros(1,secs);
 
 for step = 1:secs/tc
 % ------------------------- Material Addition -----------------------
@@ -550,6 +559,18 @@ Q_gaswater = K_water5*((T_gas - T_roof)*(A1/(A1+A2)) + (T_gas - T_wall)*(A2/(A1+
 
 % Radiative heat transfer at arc
 Q_arcRAD = 0.75 * P_arc;
+
+
+% -------------- View Factor Change ------------
+if m_sSc/m_lSc < 0.2
+    VF53 = 0.22;
+    VF54 = 0.4;
+    K_sSclSc = 0.8;
+else
+    VF53 = 0.82;
+    VF54 = 0;
+    K_sSclSc = 0;
+end
 
 % ---------------------- Temperature change -----------------------
 % Temperature change of sSl
@@ -931,25 +952,25 @@ end
 % Graph generation
 time = linspace(1, secs, secs);
 
-% figure
-% plot(time, gas_temp)
-% hold on
-% plot(time, sSc_temp)
-% plot(time, sSl_temp)
-% plot(time, lSc_temp)
-% plot(time, lSl_temp)
-% 
-% legend('Gas', 'Solid Metal', 'Solid Slag', 'Liquid Metal', 'Liquid Slag')
-% hold off
-% 
-% figure
-% plot(time, steel_Fe)
-% 
-% figure
-% plot(time, m_solid)
-% hold on
-% plot(time, m_liquid)
-% plot(time, m_solid_slag)
-% plot(time, m_liquid_slag)
-% legend('solid', 'liquid', 'solid slag', 'liquid slag')
-% hold off
+figure
+plot(time, gas_temp)
+hold on
+plot(time, sSc_temp)
+plot(time, sSl_temp)
+plot(time, lSc_temp)
+plot(time, lSl_temp)
+
+legend('Gas', 'Solid Metal', 'Solid Slag', 'Liquid Metal', 'Liquid Slag')
+hold off
+
+figure
+plot(time, steel_Fe)
+
+figure
+plot(time, m_solid)
+hold on
+plot(time, m_liquid)
+plot(time, m_solid_slag)
+plot(time, m_liquid_slag)
+legend('solid', 'liquid', 'solid slag', 'liquid slag')
+hold off
