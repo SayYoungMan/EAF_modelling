@@ -9,7 +9,7 @@ clc
 ts = 1/1000; % 10^-3 s
 
 % Total operating time in s
-secs = 5000;
+secs = 2000;
 
 % Takeout interval in s
 out = 600;
@@ -65,7 +65,7 @@ MX_Al2O3_slg = 0.05;
 % --------- Reactor Geometry ---------
 r_eafout = 3.3;
 r_eafin = 2.45;
-r_hole = 1.7;
+r_hole = 0.3;
 r_electrode = 0.3;
 h_eafup = 2.9;
 h_eaflow = 1.0;
@@ -122,8 +122,9 @@ m_Cr_lSc = 25.1;
 m_Mn_lSc  = 14.2;
 m_P_lSc = 3;
 m_Si_lSc = 35.5;
+m_Al_lSc = 0;
 
-m_lSc = m_Fe_lSc + m_C_lSc + m_Cr_lSc + m_Mn_lSc + m_P_lSc + m_Si_lSc;
+m_lSc = m_Fe_lSc + m_C_lSc + m_Cr_lSc + m_Mn_lSc + m_P_lSc + m_Si_lSc + m_Al_lSc;
 
 % Solid slag initial mass
 m_CaO_sSl = 849;
@@ -419,11 +420,11 @@ for step = 1:secs/ts
     % ----------- Liquid Metal ------------
     
     % Total mass of liquid metal
-    m_lSc = m_Fe_lSc + m_C_lSc + m_Cr_lSc + m_Mn_lSc + m_P_lSc + m_Si_lSc;
+    m_lSc = m_Fe_lSc + m_C_lSc + m_Cr_lSc + m_Mn_lSc + m_P_lSc + m_Si_lSc + m_Al_lSc;
     
     % Total mole of liquid metal
     XM_lSc = (m_Fe_lSc/M_Fe) + (m_C_lSc/M_C) + (m_Cr_lSc/M_Cr) + (m_Mn_lSc/M_Mn) ...
-        + (m_P_lSc/M_P) + (m_Si_lSc/M_Si);
+        + (m_P_lSc/M_P) + (m_Si_lSc/M_Si) + (m_Al_lSc/M_Al);
     
     % Mole fractions of compounds in liquid metal
     X_Fe_lSc = (m_Fe_lSc/M_Fe) / XM_lSc;
@@ -432,6 +433,7 @@ for step = 1:secs/ts
     X_Mn_lSc = (m_Mn_lSc/M_Mn) / XM_lSc;
     X_P_lSc = (m_P_lSc/M_P) / XM_lSc;
     X_Si_lSc = (m_Si_lSc/M_Si) / XM_lSc;
+    X_Al_lSc = (m_Al_lSc/M_Al) / XM_lSc;
     
     % Mass fractions of compounds in liquid metal
     MX_Fe_lSc = m_Fe_lSc / m_lSc;
@@ -440,6 +442,7 @@ for step = 1:secs/ts
     MX_Mn_lSc = m_Mn_lSc / m_lSc;
     MX_P_lSc = m_P_lSc / m_lSc;
     MX_Si_lSc = m_Si_lSc / m_lSc;
+    MX_Al_lSc = m_Al_lSc / m_lSc;
     
     % ------------ Solid Slag -------------
     
@@ -627,7 +630,7 @@ for step = 1:secs/ts
     % Rate of reaction
     r_2MnO_Si = (kd_Mn2 * (X_MnO_lSl - Xeq_MnO2)) / M_MnO;
     
-    % ------- Mn reaction with FeO ---------
+    % -------- Mn reaction with FeO --------
     
     % Mn + FeO -> MnO + Fe
     
@@ -990,7 +993,7 @@ for step = 1:secs/ts
     % Energy loss from gas zone to furnace roof and walls
     Q_gaswater = K_water5*((T_gas - T_roof)*(A1/(A1+A2)) + (T_gas - T_wall)*(A2/(A1+A2)));
     
-    % ====================== Reactor Geometry ====================
+    % ====================== Reactor Areas ====================
     
     % Areas of roof and wall
     A1 = (pi * r_eafout^2) - (pi * r_hole^2); % roof
@@ -999,6 +1002,17 @@ for step = 1:secs/ts
     % Surface area of sSc and lSc
     A3 = (pi * r_eafout^2) - (pi * (d_coneout/2)^2) + (pi*0.75*d_coneout*sqrt(h_cone + d_coneout/4));
     A4 = pi * r_eafin^2;
+    
+    % ====================== Slag Foaming =====================
+    % All from Fruham 1999
+    
+    % Slag viscosity
+    nu_A = exp(-17.51 - 35.76*X_Al2O3_lSl + 1.73*X_CaO_lSl);
+    nu_B = 31.1140 - 68.833*X_Al2O3_lSl - 23.896*X_CaO_lSl;
+    nu = nu_A * T_lSl * exp(nu_B/T_lSl);
+    
+    % Surface tension
+    sigma = 0.6; % N/m
     
     % ======================== View Factor =======================
     
@@ -1225,9 +1239,8 @@ for step = 1:secs/ts
     dT_wall = (-Q_wallRAD + (A2/(A1+A2))*Q_gaswater - phi2*Cp_H2O*(T_wall - T_water)) ...
         / (A2*d2*rho*Cp_wall);
     
-    T_sSc = T_sSc + dT_sSc * ts;
+    
     T_lSc = T_lSc + dT_lSc * ts;
-    T_sSl = T_sSl + dT_sSl * ts;
     T_lSl = T_lSl + dT_lSl * ts;
     T_gas = T_gas + dT_gas * ts;
     T_roof = T_roof + dT_roof * ts;
@@ -1242,6 +1255,8 @@ for step = 1:secs/ts
     
     % Melt rate of solid metal (kg/s)
     dm_sSc = ((Q_sSc*(T_sSc/T_melt)) / (lambda_sSc + Cp_sSc*(T_melt - T_sSc)));
+    Q_sSc = Q_sSc - dm_sSc * lambda_sSc;
+    T_sSc = T_sSc + dT_sSc * ts;
     T_lSc = (T_lSc * m_lSc + T_melt * dm_sSc * ts) / (m_lSc + dm_sSc * ts);
     
     m_Cr_sSc = m_Cr_sSc - (dm_sSc*MX_Cr_sSc*ts);
@@ -1269,6 +1284,9 @@ for step = 1:secs/ts
     
     % Melt rate of solid slag (kg/s)
     dm_sSl = (Q_sSl*(T_sSl/T_melt)) / ((lambda_sSl + Cp_sSl*(T_melt - T_sSl))/M_sSl);
+    Q_sSl = Q_sSl - dm_sSl * lambda_sSl;
+    T_sSl = T_sSl + dT_sSl * ts;
+    T_lSl = (T_lSl * m_lSl + T_melt * dm_sSl * ts) / (m_lSl + dm_sSl * ts);
     
     m_Al2O3_sSl = m_Al2O3_sSl - (dm_sSl*MX_Al2O3_sSl*ts);
     m_Al2O3_lSl = m_Al2O3_lSl + (dm_sSl*MX_Al2O3_sSl*ts);
@@ -1278,8 +1296,6 @@ for step = 1:secs/ts
     m_MgO_lSl = m_MgO_lSl + (dm_sSl*MX_MgO_sSl*ts);
     m_SiO2_sSl = m_SiO2_sSl - (dm_sSl*MX_SiO2_sSl*ts);
     m_SiO2_lSl = m_SiO2_lSl + (dm_sSl*MX_SiO2_sSl*ts);
-    
-    T_lSl = (T_lSl * m_lSl + T_melt * dm_sSl * ts) / (m_lSl + dm_sSl * ts);
     
     % ===================== Geometry Change ======================
     
