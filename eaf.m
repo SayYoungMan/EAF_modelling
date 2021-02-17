@@ -9,7 +9,7 @@ clc
 ts = 1/1000; % 10^-3 s
 
 % Total operating time in s
-secs = 2000;
+secs = 5000;
 
 % Takeout interval in s
 out = 600;
@@ -79,7 +79,7 @@ d2 = 0.45;
 C_inj = 0;
 
 % Oxygen Lance Rate (kg/s)
-O2_lance = 3;
+O2_lance = 2;
 
 % O2 for post combustion (kg/s)
 O2_post = 0;
@@ -122,9 +122,8 @@ m_Cr_lSc = 25.1;
 m_Mn_lSc  = 14.2;
 m_P_lSc = 3;
 m_Si_lSc = 35.5;
-m_Al_lSc = 0;
 
-m_lSc = m_Fe_lSc + m_C_lSc + m_Cr_lSc + m_Mn_lSc + m_P_lSc + m_Si_lSc + m_Al_lSc;
+m_lSc = m_Fe_lSc + m_C_lSc + m_Cr_lSc + m_Mn_lSc + m_P_lSc + m_Si_lSc;
 
 % Solid slag initial mass
 m_CaO_sSl = 849;
@@ -216,6 +215,7 @@ A4 = pi * r_eafin^2;
 
 % Initial Pressure
 p_gas = 1.2; % atm
+rp = 0; % Relative pressure
 
 % Exposure constant
 K_sSclSc = 0.5*tanh(5*(h_lSc-h_sSc1-h_sSc2+h_cone)) + 0.5;
@@ -359,6 +359,12 @@ K_O2Cr2O3 = 0.015;
 K_O2FeO = 0.75;
 K_O2SiO2 = 0.035;
 
+% Vent
+hd = 0.65;
+k_U = 6.44;
+u1 = 11;
+u2 = 0.3;
+
 V_gas = 45;
 
 % ------------------------- Arrays for graph ------------------------
@@ -372,6 +378,7 @@ m_solid = zeros(1,secs);
 m_liquid = zeros(1,secs);
 m_solid_slag = zeros(1,secs);
 m_liquid_slag = zeros(1,secs);
+rel_pres = zeros(1,secs);
 
 for step = 1:secs/ts
     
@@ -420,11 +427,11 @@ for step = 1:secs/ts
     % ----------- Liquid Metal ------------
     
     % Total mass of liquid metal
-    m_lSc = m_Fe_lSc + m_C_lSc + m_Cr_lSc + m_Mn_lSc + m_P_lSc + m_Si_lSc + m_Al_lSc;
+    m_lSc = m_Fe_lSc + m_C_lSc + m_Cr_lSc + m_Mn_lSc + m_P_lSc + m_Si_lSc;
     
     % Total mole of liquid metal
     XM_lSc = (m_Fe_lSc/M_Fe) + (m_C_lSc/M_C) + (m_Cr_lSc/M_Cr) + (m_Mn_lSc/M_Mn) ...
-        + (m_P_lSc/M_P) + (m_Si_lSc/M_Si) + (m_Al_lSc/M_Al);
+        + (m_P_lSc/M_P) + (m_Si_lSc/M_Si);
     
     % Mole fractions of compounds in liquid metal
     X_Fe_lSc = (m_Fe_lSc/M_Fe) / XM_lSc;
@@ -433,7 +440,6 @@ for step = 1:secs/ts
     X_Mn_lSc = (m_Mn_lSc/M_Mn) / XM_lSc;
     X_P_lSc = (m_P_lSc/M_P) / XM_lSc;
     X_Si_lSc = (m_Si_lSc/M_Si) / XM_lSc;
-    X_Al_lSc = (m_Al_lSc/M_Al) / XM_lSc;
     
     % Mass fractions of compounds in liquid metal
     MX_Fe_lSc = m_Fe_lSc / m_lSc;
@@ -442,7 +448,6 @@ for step = 1:secs/ts
     MX_Mn_lSc = m_Mn_lSc / m_lSc;
     MX_P_lSc = m_P_lSc / m_lSc;
     MX_Si_lSc = m_Si_lSc / m_lSc;
-    MX_Al_lSc = m_Al_lSc / m_lSc;
     
     % ------------ Solid Slag -------------
     
@@ -1349,11 +1354,13 @@ for step = 1:secs/ts
     % C + 1/2 O2 -> CO
     m_C_lSc = m_C_lSc - (r_C_hO2 * M_C * ts);
     m_CO = m_CO + (r_C_hO2 * M_CO * ts);
+    m_O2 = m_O2 - 0.5*(r_C_hO2 * M_O2 * ts);
     
     % To carbon dioxide
     % C + O2 -> CO2
     m_C_lSc = m_C_lSc - (r_C_O2 * M_C * ts);
     m_CO2 = m_CO2 + (r_C_O2 * M_CO2 * ts);
+    m_O2 = m_O2 - (r_C_O2 * M_O2 * ts);
     
     % -------- MnO Decarburization ----------
     
@@ -1379,6 +1386,7 @@ for step = 1:secs/ts
     
     m_Si_lSc = m_Si_lSc - (r_Si_O2 * M_Si * ts);
     m_SiO2_lSl = m_SiO2_lSl + (r_Si_O2 * M_SiO2 * ts);
+    m_O2 = m_O2 - (r_Si_O2 * M_O2 * ts);
     
     % ------- Si reaction with MnO --------
     
@@ -1413,6 +1421,7 @@ for step = 1:secs/ts
     
     m_Cr_lSc = m_Cr_lSc - 2*(r_2Cr_3hO2 * M_Cr * ts);
     m_Cr2O3_lSl = m_Cr2O3_lSl + (r_2Cr_3hO2 * M_Cr2O3 * ts);
+    m_O2 = m_O2 - 1.5*(r_2Cr_3hO2 * M_O2 * ts);
     
     % -------- Phosphorus Oxidation --------
     
@@ -1435,6 +1444,7 @@ for step = 1:secs/ts
     % C9H20 + 14O2 -> 9CO2 + 10H2O
     
     m_comb_sSc = m_comb_sSc - (r_comb * M_C9H20 * ts);
+    m_O2 = m_O2 - 14*(r_comb * M_O2 * ts);
     m_CO = m_CO + 9*(r_comb * M_CO2 * ts);
     m_H2O = m_H2O + 10*(r_comb * M_H2O * ts);
     
@@ -1444,7 +1454,7 @@ for step = 1:secs/ts
     
     m_O2 = m_O2 + (O2_post - r_post*M_O2) * ts;
     m_CO = m_CO - 2*(r_post * M_CO * ts);
-    m_CO2 = m_CO2 + 2*(r_post * M_CO * ts);
+    m_CO2 = m_CO2 + (r_post * M_CO2 * ts);
     
     % ======================= Material Addition ======================
     
@@ -1484,26 +1494,45 @@ for step = 1:secs/ts
     
     % ------ Extra Material Addition -----
     
+    % Oxygen Lance
+    m_O2 = m_O2 + O2_lance * ts;
+    
     % Carbon injection
     m_CL = m_CL + (C_inj * ts);
     
     % ======================== Take out ========================
-    thres_gas = (121590*V_gas) / (R * T_gas);
+%     thres_gas = (121590*V_gas) / (R * T_gas);
+% 
+%     if XM_gas > thres_gas
+%         gas_out = XM_gas - thres_gas;
+%         H2O_out = gas_out * X_H2O;
+%         CO2_out = gas_out * X_CO2;
+%         CO_out = gas_out * X_CO;
+%         O2_out = gas_out * X_O2;
+%         
+%         m_H2O = m_H2O - (H2O_out*M_H2O);
+%         m_CO2 = m_CO2 - (CO2_out*M_CO2);
+%         m_CO = m_CO - (CO_out*M_CO);
+%         m_O2 = m_O2 - (O2_out*M_O2);
+%         
+%         T_gas = (T_gas * XM_gas + T_air * gas_out) / (XM_gas + gas_out);
+%     end
 
-    if XM_gas > thres_gas
-        gas_out = XM_gas - thres_gas;
-        H2O_out = gas_out * X_H2O;
-        CO2_out = gas_out * X_CO2;
-        CO_out = gas_out * X_CO;
-        O2_out = gas_out * X_O2;
-        
-        m_H2O = m_H2O - (H2O_out*M_H2O);
-        m_CO2 = m_CO2 - (CO2_out*M_CO2);
-        m_CO = m_CO - (CO_out*M_CO);
-        m_O2 = m_O2 - (O2_out*M_O2);
-        
-        T_gas = (T_gas * XM_gas + T_air * gas_out) / (XM_gas + gas_out);
-    end
+    % Off gas venting
+    m_CO = m_CO - (hd*u1*MX_CO)/(k_U*u2+hd) * ts;
+    m_CO2 = m_CO2 - (hd*u1*MX_CO2)/(k_U*u2+hd) * ts;
+    m_O2 = m_O2 - (hd*u1*MX_O2)/(k_U*u2+hd) * ts;
+    m_H2O = m_H2O - (hd*u1*MX_H2O)/(k_U*u2+hd) * ts;
+    
+    dm_CO = r_FeO_CL * M_CO + r_FeO_CD * M_CO + r_C_hO2 * M_CO + r_MnO_C * M_MnO ...
+        + 9*r_comb * M_CO2 - 2*r_post * M_CO;
+    dm_CO2 = r_C_O2 * M_CO2 + 9*r_comb * M_CO2 + r_post * M_CO2;
+    dm_O2 = O2_lance -0.5*r_C_hO2 * M_O2 - r_C_O2 * M_O2 - r_Si_O2 * M_O2 ...
+        -1.5*r_2Cr_3hO2 * M_O2 - 14*r_comb * M_O2 + (O2_post - r_post*M_O2);
+    dm_H2O = 10*r_comb * M_H2O;
+    
+    rp = (R*T_gas/V_gas)*(dm_CO/M_CO + dm_CO2/M_CO2 + dm_O2/M_O2 + dm_H2O/M_H2O) ...
+        + (R*dT_gas/V_gas)*(m_CO/M_CO + m_CO2/M_CO2 + m_O2/M_O2 + m_H2O/M_H2O);
 
     if mod(step, out/ts) == 0
         
@@ -1529,11 +1558,6 @@ for step = 1:secs/ts
         
     end 
     
-    % ====================== For Dev =======================
-    
-    O2_lance_use = ((r_C_hO2/2) + r_C_O2 + 1.5*r_2Cr_3hO2 + (r_Fe_hO2/2) ...
-        + r_Si_O2 + 14*r_comb) * M_O2;
-    
     % ===================== For Graph =======================
     if mod(step, 1/ts) == 0
         gas_temp(step*ts) = T_gas;
@@ -1546,6 +1570,7 @@ for step = 1:secs/ts
         m_liquid(step*ts) = m_lSc;
         m_solid_slag(step*ts) = m_sSl;
         m_liquid_slag(step*ts) = m_lSl;
+        rel_pres(step*ts) = rp;
     end
     
 end
@@ -1566,6 +1591,9 @@ hold off
 
 figure
 plot(time, steel_Fe)
+
+figure
+plot(time, rel_pres)
 
 figure
 plot(time, m_solid)
