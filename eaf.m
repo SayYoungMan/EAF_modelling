@@ -9,7 +9,7 @@ clc
 ts = 1/1000; % 10^-3 s
 
 % Total operating time in s
-secs = 5000;
+secs = 3000;
 
 % Takeout interval in s
 out = 600;
@@ -57,10 +57,10 @@ T_slg = 300;
 slg_add = 3;
 
 % Slag mass fraction
-MX_CaO_slg = 0.90;
-MX_MgO_slg = 0.04;
-MX_SiO2_slg = 0.01;
-MX_Al2O3_slg = 0.05;
+MX_CaO_slg = 0.573;
+MX_MgO_slg = 0.415;
+MX_SiO2_slg = 0.007;
+MX_Al2O3_slg = 0.005;
 
 % --------- Reactor Geometry ---------
 r_eafout = 3.3;
@@ -77,6 +77,9 @@ d2 = 0.45;
 
 % Carbon Injection Rate (kg/s)
 C_inj = 0;
+
+% Manganese Injection Rate (kg/s)
+Mn_inj = 1.6;
 
 % Oxygen Lance Rate (kg/s)
 O2_lance = 2;
@@ -99,16 +102,16 @@ phi2 = 150/0.018;
 % ------------- Initial mass (kg) --------------
 
 % Solid metal initial mass
-m_Fe_sSc = 759;
+m_Fe_sSc = 776;
 m_C_sSc = 5;
-m_Cr_sSc = 0.31;
-m_Mn_sSc = 1;
-m_P_sSc = 0.078;
-m_SiO2_sSc = 32.87;
-m_Al2O3_sSc = 25.16;
+m_Cr_sSc = 0.32;
+m_Mn_sSc = 12.5;
+m_P_sSc = 0.08;
+m_SiO2_sSc = 33.64;
+m_Al2O3_sSc = 25.74;
 m_CaO_sSc = 1;
-m_MgO_sSc = 0.54;
-m_MnO_sSc = 0.0671;
+m_MgO_sSc = 0.55;
+m_MnO_sSc = 0.0686;
 m_Si_sSc = 1;
 m_comb_sSc = 5.6;
 
@@ -116,52 +119,52 @@ m_sSc = m_Fe_sSc + m_C_sSc + m_Cr_sSc + m_Mn_sSc + m_P_sSc + m_SiO2_sSc + ...
     m_Al2O3_sSc + m_CaO_sSc + m_MgO_sSc + m_MnO_sSc + m_Si_sSc + m_comb_sSc;
 
 % Liquid metal initial mass
-m_Fe_lSc = 60981;
-m_C_lSc = 102;
-m_Cr_lSc = 25.1;
-m_Mn_lSc  = 14.2;
+m_Fe_lSc = 63357;
+m_C_lSc = 82;
+m_Cr_lSc = 25.3;
+m_Mn_lSc  = 406;
 m_P_lSc = 3;
-m_Si_lSc = 35.5;
+m_Si_lSc = 88.3;
 
 m_lSc = m_Fe_lSc + m_C_lSc + m_Cr_lSc + m_Mn_lSc + m_P_lSc + m_Si_lSc;
 
 % Solid slag initial mass
-m_CaO_sSl = 849;
-m_MgO_sSl = 37.7;
-m_SiO2_sSl = 9.4;
-m_Al2O3_sSl = 47.3;
+m_CaO_sSl = 642;
+m_MgO_sSl = 465;
+m_SiO2_sSl = 7.84;
+m_Al2O3_sSl = 5.6;
 
 % Liquid slag initial mass
-m_SiO2_lSl = 2923;
-m_Al2O3_lSl = 2259;
-m_CaO_lSl = 1827;
-m_MgO_lSl = 121;
-m_MnO_lSl = 90.5;
-m_P2O5_lSl = 8.4;
-m_Cr2O3_lSl = 2.3;
-m_FeO_lSl = 4549;
+m_SiO2_lSl = 2802;
+m_Al2O3_lSl = 2157;
+m_CaO_lSl = 1113;
+m_MgO_lSl = 793.6;
+m_MnO_lSl = 826.2;
+m_P2O5_lSl = 8.2;
+m_Cr2O3_lSl = 2.06;
+m_FeO_lSl = 1843;
 
 m_lSl = m_SiO2_lSl + m_Al2O3_lSl + m_CaO_lSl + m_MgO_lSl + m_MnO_lSl + ...
     m_P2O5_lSl + m_Cr2O3_lSl + m_FeO_lSl;
 
 % Gas initial mass
-m_H2O = 7.465;
-m_O2 = 1.086;
-m_CO = 30.55;
-m_CO2 = 30.065;
+m_H2O = 182;
+m_O2 = 414;
+m_CO = 1388;
+m_CO2 = 190;
 
 % Initial mass of injected carbon
 m_CL = 0.0671;
 
 % ------------- Initial temp. (K) --------------
 
-T_sSc = 791;
-T_lSc = 2011;
-T_sSl = 1086;
-T_lSl = 1981;
-T_gas = 1839;
-T_wall = 337;
-T_roof = 391.4;
+T_sSc = 793;
+T_lSc = 1899;
+T_sSl = 1091;
+T_lSl = 1865;
+T_gas = 1969;
+T_wall = 334;
+T_roof = 386;
 
 % -------------- Initial Geometry --------------
 
@@ -362,7 +365,7 @@ K_O2SiO2 = 0.035;
 % Vent
 hd = 0.65;
 k_U = 6.44;
-u1 = 11;
+u1 = 17;
 u2 = 0.3;
 
 V_gas = 45;
@@ -598,9 +601,12 @@ for step = 1:secs/ts
     % Equilibrium constant
     K_Si = 10 ^ (30410/T_lSc - 11.59); % Turkdogan 1996
     
+    % Oxygen Solubility
+    O_sol = (10 ^ (-6380/T_lSc + 2.765)); % Turkdogan 1996
+    
     % Equilibrium fraction
-    kX_Si = a_SiO2_bas / (K_Si * MX_FeO_lSl^2); % Turkogan 1996
-    Xeq_Si = kX_Si / (X_FeO_lSl^2);
+    MXeq_Si = a_SiO2_bas / (K_Si * O_sol^2); % Turkogan 1996
+    Xeq_Si = MXeq_Si * (M_Fe/(M_Si*100));
     % Xeq_Si = ((MXeq_Si * m_lSc) / M_Si) / XM_lSc; 
     % Xeq_Si = 8.08e-08* ((m_lSl*M_FeO)/(m_FeO_lSl*M_lSl) + (m_SiO2_lSl*M_FeO) ...
     %     /(m_FeO_lSl*M_SiO2) + 1)^2; % Bekkar 1999
@@ -1499,6 +1505,9 @@ for step = 1:secs/ts
     
     % Carbon injection
     m_CL = m_CL + (C_inj * ts);
+    
+    % Manganese Injection
+    m_Mn_sSc = m_Mn_sSc + (Mn_inj * ts);
     
     % ======================== Take out ========================
 %     thres_gas = (121590*V_gas) / (R * T_gas);
