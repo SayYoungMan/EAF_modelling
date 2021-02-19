@@ -9,44 +9,10 @@ clc
 ts = 1/1000; % 10^-3 s
 
 % Total operating time in s
-secs = 3000;
+secs = 200;
 
 % Takeout interval in s
 out = 600;
-
-% ---------- DRI Settings -----------
-
-% Temperature of DRI in K
-T_DRI = 559.32;
-
-% DRI mass addition rate in kg/s
-DRI_add = (309073*1.11)/3600;
-
-% DRI mass fraction
-MX_Fe_DRI = 0.9048;
-MX_C_DRI = 0.0064;
-MX_SiO2_DRI = 0.0490;
-MX_Al2O3_DRI = 0.0375;
-MX_CaO_DRI = 0.0014;
-MX_MgO_DRI = 0.0008;
-MX_MnO_DRI = 0.0001;
-
-% --------- Scrap Settings -----------
-
-% Temperature of scrap in K
-T_scr = 559.32;
-
-% DRI mass addition rate in kg/s
-scr_add = 80000/3600;
-
-% DRI mass fraction
-MX_Fe_scr = 0.9705;
-MX_C_scr = 0.004;
-MX_Si_scr = 0.006;
-MX_Cr_scr = 0.002;
-MX_P_scr = 0.0005;
-MX_Mn_scr = 0.006;
-MX_comb_scr = 0.011;
 
 % ---------- Slag Settings -----------
 
@@ -54,7 +20,7 @@ MX_comb_scr = 0.011;
 T_slg = 300;
 
 % Slag mass addition rate in kg/s
-slg_add = 3;
+slg_add = 1.05;
 
 % Slag mass fraction
 MX_CaO_slg = 0.573;
@@ -79,19 +45,19 @@ d2 = 0.45;
 C_inj = 0;
 
 % Manganese Injection Rate (kg/s)
-Mn_inj = 1.6;
+Mn_inj = 0;
 
 % Oxygen Lance Rate (kg/s)
-O2_lance = 2.5;
+O2_lance = 0;
 
 % O2 for post combustion (kg/s)
 O2_post = 0;
 
 % Power of arc (kW)
-P_arc = 40000;
+P_arc = 48900;
 
 % EAF mass capacity (kg)
-m_EAF = 200000;
+m_EAF = 135000;
 
 % Cooling water flowrate (mol/s)
 phi1 = 80/0.018;
@@ -102,69 +68,69 @@ phi2 = 150/0.018;
 % ------------- Initial mass (kg) --------------
 
 % Solid metal initial mass
-m_Fe_sSc = 776;
-m_C_sSc = 5;
-m_Cr_sSc = 0.32;
-m_Mn_sSc = 12.5;
-m_P_sSc = 0.08;
-m_SiO2_sSc = 33.64;
-m_Al2O3_sSc = 25.74;
-m_CaO_sSc = 1;
-m_MgO_sSc = 0.55;
-m_MnO_sSc = 0.0686;
-m_Si_sSc = 1;
-m_comb_sSc = 5.6;
+m_Fe_sSc = 40000 * 0.9705;
+m_C_sSc = 40000 * 0.004;
+m_Cr_sSc = 40000 * 0.002;
+m_Mn_sSc = 40000 * 0.006;
+m_P_sSc = 40000 * 0.0005;
+m_SiO2_sSc = 0;
+m_Al2O3_sSc = 0;
+m_CaO_sSc = 0;
+m_MgO_sSc = 0;
+m_MnO_sSc = 0;
+m_Si_sSc = 40000 * 0.006;
+m_comb_sSc = 40000 * 0.011;
 
 m_sSc = m_Fe_sSc + m_C_sSc + m_Cr_sSc + m_Mn_sSc + m_P_sSc + m_SiO2_sSc + ...
     m_Al2O3_sSc + m_CaO_sSc + m_MgO_sSc + m_MnO_sSc + m_Si_sSc + m_comb_sSc;
 
 % Liquid metal initial mass
-m_Fe_lSc = 63357;
-m_C_lSc = 82;
-m_Cr_lSc = 25.3;
-m_Mn_lSc  = 406;
-m_P_lSc = 3;
-m_Si_lSc = 88.3;
+m_Fe_lSc = 1;
+m_C_lSc = 0.01;
+m_Cr_lSc = 0.01;
+m_Mn_lSc  = 0.01;
+m_P_lSc = 0.01;
+m_Si_lSc = 0.01;
 
 m_lSc = m_Fe_lSc + m_C_lSc + m_Cr_lSc + m_Mn_lSc + m_P_lSc + m_Si_lSc;
 
 % Solid slag initial mass
-m_CaO_sSl = 642;
-m_MgO_sSl = 465;
-m_SiO2_sSl = 7.84;
-m_Al2O3_sSl = 5.6;
+m_CaO_sSl = 2500 * 0.567;
+m_MgO_sSl = 2500 * 0.412;
+m_SiO2_sSl = 2500 * 0.007;
+m_Al2O3_sSl = 2500 * 0.0045;
 
 % Liquid slag initial mass
-m_SiO2_lSl = 2802;
-m_Al2O3_lSl = 2157;
-m_CaO_lSl = 1113;
-m_MgO_lSl = 793.6;
-m_MnO_lSl = 826.2;
-m_P2O5_lSl = 8.2;
-m_Cr2O3_lSl = 2.06;
-m_FeO_lSl = 1843;
+m_SiO2_lSl = 1;
+m_Al2O3_lSl = 1;
+m_CaO_lSl = 2;
+m_MgO_lSl = 2;
+m_MnO_lSl = 1;
+m_P2O5_lSl = 0.1;
+m_Cr2O3_lSl = 0.1;
+m_FeO_lSl = 2;
 
 m_lSl = m_SiO2_lSl + m_Al2O3_lSl + m_CaO_lSl + m_MgO_lSl + m_MnO_lSl + ...
     m_P2O5_lSl + m_Cr2O3_lSl + m_FeO_lSl;
 
 % Gas initial mass
-m_H2O = 182;
-m_O2 = 414;
-m_CO = 1388;
-m_CO2 = 190;
+m_H2O = 18;
+m_O2 = 41;
+m_CO = 60;
+m_CO2 = 19;
 
 % Initial mass of injected carbon
-m_CL = 0.0671;
+m_CL = 0;
 
 % ------------- Initial temp. (K) --------------
 
-T_sSc = 793;
-T_lSc = 1899;
-T_sSl = 1091;
-T_lSl = 1865;
-T_gas = 1969;
-T_wall = 334;
-T_roof = 386;
+T_sSc = 298;
+T_lSc = 1809;
+T_sSl = 298;
+T_lSl = 1809;
+T_gas = 300;
+T_wall = 298;
+T_roof = 298;
 
 % -------------- Initial Geometry --------------
 
@@ -207,11 +173,11 @@ h_sSc1 = h_cone;
 h_arc = h_eafup - h_electrode - (h_sSc2 - h_cone);
 
 % height of wall
-h_wall = h_eafup + h_eaflow - h_sSc1 - h_lSc - h_lSl;
+h_wall = h_eafup - h_sSc1;
 
 % Areas of roof and wall
-A1 = (pi * r_eafout^2) - (pi * r_hole^2); % roof
-A2 = 2 * pi * r_eafout * h_wall; % wall
+A1 = 25.5; % roof
+A2 = 17.1; % wall
 A4 = pi * r_eafin^2;
 
 % ----------------- Others ---------------------
@@ -277,7 +243,7 @@ kd_comb = 0.1; %s-1
 
 % Heat capacities (kJ/mol K)
 Cp_C = 0.02092;  % at 1800K (from NIST)
-Cp_H2O = 0.075;
+Cp_H2O = 0.050;
 Cp_sSc = 0.039;
 Cp_lSc = 0.047;
 Cp_sSl = 0.025;
@@ -365,16 +331,10 @@ K_O2SiO2 = 0.035;
 % Vent
 hd = 0.65;
 k_U = 6.44;
-u1 = 17;
+u1 = 10.5;
 u2 = 0.3;
 
 V_gas = 45;
-
-% Electrode
-R_tip = 0.02;
-R_side = 10;
-A_side = 35;
-I_arc = 44;
 
 % ------------------------- Arrays for graph ------------------------
 gas_temp = zeros(1,secs);
@@ -714,19 +674,13 @@ for step = 1:secs/ts
     
     r_comb = (kd_comb * m_comb_sSc * (T_sSc/T_melt)) / M_C9H20;
     
-    % ----------- Post Combustion ------------
+    % ----------- Pose Combustion ------------
     
     % CO + 1/2O2 -> CO2
     
     K_mCO = 0.9;
     
     r_post = (O2_post * K_mCO) / M_O2;
-    
-    % --------- Electrode Oxidation ----------
-    
-    % C + O2 -> CO2
-    
-    dm_el = 3*(R_tip * (I_arc^2/3600) + R_side * (A_side/3600));
     
     % =================== Reaction Heat Transfer ====================
     
@@ -747,10 +701,6 @@ for step = 1:secs/ts
     
     t = (T_lSc-298)/1000;
     CpdT_C = 21.17510*t + (-0.812428/2)*t^2 + (0.448537/3)*t^3 + (-0.043256/4)*t^4 ...
-            - (-0.013103)/t;
-        
-    t = (T_gas-298)/1000;
-    CpdT_C_gas = 21.17510*t + (-0.812428/2)*t^2 + (0.448537/3)*t^3 + (-0.043256/4)*t^4 ...
             - (-0.013103)/t;
     
     if T_lSc < 1650
@@ -956,8 +906,8 @@ for step = 1:secs/ts
 %     dH_Tn = -(CH4_inj/M_CH4) * ((dH_CO2 + 2*dH_H2O - dH_CH4) + ...
 %         (Cp_CO2 + 2*Cp_H2O - Cp_CH4 - 2*Cp_O2) * (T_gas - 298));
 
-    % o) Graphite to CO2
-    dH_To = -(dm_el/M_C) * (dH_CO2 + CpdT_CO2_gas - CpdT_C_gas - CpdT_O2_gas);
+%     % o) Graphite to CO2
+%     dH_To = -(dm_el/M_C) * (dH_CO2 + (Cp_CO2 - Cp_C - Cp_O2) * (T_gas - 298));
 
     % p) C9H20 + 14O2 -> 9CO2 + 10H2O
     dH_Tp = r_comb * ((9*dH_CO2 + 10*dH_H2O - dH_C9H20) + ...
@@ -1022,10 +972,6 @@ for step = 1:secs/ts
     
     % ====================== Reactor Areas ====================
     
-    % Areas of roof and wall
-    A1 = (pi * r_eafout^2) - (pi * r_hole^2); % roof
-    A2 = 2 * pi * r_eafout * h_wall; % wall
-    
     % Surface area of sSc and lSc
     A3 = (pi * r_eafout^2) - (pi * (d_coneout/2)^2) + (pi*0.75*d_coneout*sqrt(h_cone + d_coneout/4));
     A4 = pi * r_eafin^2;
@@ -1034,170 +980,50 @@ for step = 1:secs/ts
     % All from Fruham 1999
     
     % Slag viscosity
-    % Read from the ternary diagram of CaO-FeO-SiO2 system (2.84)
-    nu = 0.4;
+    nu_A = exp(-17.51 - 35.76*X_Al2O3_lSl + 1.73*X_CaO_lSl);
+    nu_B = 31.1140 - 68.833*X_Al2O3_lSl - 23.896*X_CaO_lSl;
+    nu = nu_A * T_lSl * exp(nu_B/T_lSl);
     
     % Surface tension
-    sigma = 0.475; % N/m
-    
-    % Rate of Oxidation to CO
-    r_CO_ox = r_FeO_CL + r_FeO_CD + r_C_hO2 + r_MnO_C;
-    
-    % Gas Vol. flowrate and Superficial Gas Velocity
-    U_g = (r_CO_ox * 8.314 * T_gas) / ((rp + 120000)*A_eaf);
-    U_T = (14.55*U_g)/(1-0.089*U_g);
-    
-    % Bubble Diameter
-    % Drag Coeff. Cd assumed unity
-    % Bubble velocity 0.1 at U_T = 4;
-    d_b = (3/(1.225*rho_lSc^2))^(1/3) * ((2*sigma)/0.1^2);
-    
-    % Slag Foaming Index
-    Xi = 115*nu^1.2/(sigma^0.2*rho_lSl*d_b^0.9); % Taken from Zhang Fruham 1995
-    
-    % Height change due to foaming
-    dh_slag = Xi * U_g;
-    
-    % Slag Factor
-    K_slag = 0.7 * (0.5*tanh(5*(h_lSl+dh_slag)-1.25)+0.5) * (0.5*tanh(3.2*(1-(m_sSc/1000)) - 1.29) + 0.5);
+    sigma = 0.6; % N/m
     
     % ======================== View Factor =======================
     
-    % =========================
-    % ======== Glossary =======
-    % =========================
-    % ====     1 = Roof    ====
-    % ====     2 = Wall    ====
-    % ====     3 = sSc     ====
-    % ====     4 = lSc     ====
-    % ====     5 = arc     ====
-    % =========================
-    
-    % VF_51 Arc -> Roof
-    R = r_electrode / r_eafout;
-    H1 = (h_electrode + h_arc) / r_eafout;
-    H2 = h_electrode / r_eafout;
-    a1 = H1^2 + R^2 - 1;
-    a2 = H1^2 + R^2 - 1;
-    b1 = H1^2 - R^2 + 1;
-    b2 = H1^2 - R^2 + 1;
-    
-    VF_511 = (b1/(8*R*H1)) + (1/(2*pi))*(acos(a1/b1) - (1/(2*H1))*sqrt((a1+2)^2/(R^2)-4) ...
-        *acos((a1*R)/b1) - (a1/(2*R*H1))*asin(R));
-    VF_512 = (b1/(8*R*H2)) + (1/(2*pi))*(acos(a2/b2) - (1/(2*H2))*sqrt((a2+2)^2/(R^2)-4) ...
-        *acos((a2*R)/b2) - (a2/(2*R*H2))*asin(R));
-    
-    A511 = 2*pi*r_electrode*h_wall;
-    A512 = 2*pi*r_electrode*h_electrode;
-    A513 = 2*pi*r_electrode*h_arc;
-    
-    VF_51 = (1-K_slag)*VF_511;
-    
-    % VF_52 Arc -> Wall
-    X = h_cone/r_eafout;
-    Y = h_wall/r_eafout;
-    L = h_arc/r_eafout;
-    R = r_electrode/r_eafout;
-    
-    aX = X^2 + R^2 - 1;
-    bX = X^2 - R^2 + 1;
-    FX = (bX/(8*R*X)) + (1/(2*pi))*(acos(aX/bX) - (1/(2*X))*sqrt((aX+2)^2/(R^2)-4) ...
-        *acos((aX*R)/bX) - (aX/(2*R*X))*asin(R));
-    if isnan(FX)
-        FX = 0;
+    VF_51 = 0.1;
+    VF_52 = 0.3;
+    VF_12 = 0.6;
+    VF_21 = 0.3;
+    if (step < 400000) 
+        VF_53 = 0.6;
+        VF_54 = 0;
+        K_sSclSc = 0;
+        VF_13 = 0.3;
+        VF_14 = 0;
+        VF_24 = 0;
+        VF_23 = 0.5;
+        VF_31 = 0.2;
+        VF_32 = 0.7;
+        VF_41 = 0;
+        VF_42 = 0;
+    else
+        VF_53 = 0.1;
+        VF_54 = 0.5;
+        K_sSclSc = 0.9;
+        VF_13 = 0.05;
+        VF_14 = 0.2;
+        VF_24 = 0.15;
+        VF_23 = 0.05;
+        VF_31 = 0;
+        VF_32 = 0.1;
+        VF_41 = 0.25;
+        VF_42 = 0.2;
     end
     
-    aLX = (L-X)^2 + R^2 - 1;
-    bLX = (L-X)^2 - R^2 + 1;
-    FLX = (bLX/(8*R*(L-X))) + (1/(2*pi))*(acos(aLX/bLX) - (1/(2*(L-X)))*sqrt((aLX+2)^2/(R^2)-4) ...
-        *acos((aLX*R)/bLX) - (aLX/(2*R*(L-X)))*asin(R));
-    
-    aYXL = (Y+X-L)^2 + R^2 - 1;
-    bYXL = (Y+X-L)^2 - R^2 + 1;
-    FYXL = (bYXL/(8*R*(Y+X-L))) + (1/(2*pi))*(acos(aYXL/bYXL) - (1/(2*(Y+X-L)))*sqrt((aYXL+2)^2/(R^2)-4) ...
-        *acos((aYXL*R)/bYXL) - (aYXL/(2*R*(Y+X-L)))*asin(R));
-    
-    aXY = (X+Y)^2 + R^2 - 1;
-    bXY = (X+Y)^2 - R^2 + 1;
-    FXY = (bXY/(8*R*(X+Y))) + (1/(2*pi))*(acos(aXY/bXY) - (1/(2*(X+Y)))*sqrt((aXY+2)^2/(R^2)-4) ...
-        *acos((aXY*R)/bXY) - (aXY/(2*R*(X+Y)))*asin(R));
-    
-    VF_52 = (1-K_slag) * ((X/L)*FX + ((L-X)/L)*(1-FLX) + ((Y+X-L)/L)*FYXL - ((X+Y)/L)*FXY);
-    
-    % VF_53 Arc -> sSc
-    m_charge = m_sSc + m_lSc;
-    VF_53 = (1-VF_51-VF_52) * (1-K_sSclSc*(1-(m_sSc/m_charge)));
-    
-    % VF_54 Arc -> lSc
-    VF_54 = (1-VF_51-VF_52) * (K_sSclSc*(1-(m_sSc/m_charge)));
-    
-    % VF_41 lSc -> Roof
-    H = h_wall / r_eafin;
-    R2 = r_hole / r_eafin;
-    R3 = r_eafout / r_eafin;
-    
-    VF_41 = (1/2)*(R3^2 - R2^2 - sqrt((1+R3^2+H^2)^2 - 4*R3^2) + ...
-        sqrt((1+R2^2+H^2)^2 - 4*R2^2));
-    
-    % VF_14 Roof -> lSc
-    VF_14 = VF_41 * (A4/A1);
-    
-    % VF_13 Roof -> sSc
-%     H = h_wall / r_hole;
-%     R2 = r_eafout / r_hole;
-%     R3 = d_coneout/2 / r_hole;
-%     R4 = d_conein/2 / r_hole;
-    
-%     VF_131 = 1/(2*(R2^2-1)) * (sqrt((R2^2+R3^2+H^2)^2 - (2*R3*R2)^2) - ...
-%         sqrt((R2^2+R4^2+H^2)^2 - (2*R2*R4)^2) + sqrt((1+R4^2+H^2)^2 - (2*R4^2)^2) ...
-%         - sqrt((1+R3^2+H^2)^2 - (2*R3^2)^2));
-    
-    H = h_cone / (d_conein/2);
-    R = (d_coneout/2) / (d_conein/2);
-    X = 1 + R^2 + H^2;
-    
-    VF_132 = (2*R^2-X+sqrt(X^2-4*R^2))/(2*sqrt(X-2*R)*(1+R));
-    
-    VF_13 = VF_132 * VF_41;
-    
-    % VF_31 sSc -> Roof
-    VF_31 = VF_13 * (A1/A3);
-    
-    
-    
-    % VF_32 sSc -> Wall
-    R = r_eafout / (d_coneout/2);
-    H = h_wall / (d_coneout/2);
-    
-    VF_321 = VF_132 * (1/2) * (1-R^2-H^2+sqrt((1+R^2+H^2)^2-4*R^2));
-%     VF_322 = (1/2)*(1 + (1/(R^2-1)) * (H*sqrt(4*R^2+H^2) - ...
-%         sqrt((1+R^2+H^2)^2 - 4*R^2)));
-    
-    VF_32 = VF_321;
-    
-    % VF_23 Wall -> sSc
-    VF_23 = VF_32 * (A3/A2);
-    
-    % VF_42 lSc -> Wall
-    R = r_eafout / r_eafin;
-    H = h_wall / r_eafin;
-    
-    VF_42 = (1/2)*(1-R^2-H^2+sqrt((1+R^2+H^2)^2-4*R^2));
-    
-    % VF_24 Wall -> lSc
-    VF_24 = VF_42 * (A4/A2);
-    
-    % Inverse
+    A513 = 2*pi*r_electrode*h_arc;
     VF_15 = VF_51 * (A513/A1);
     VF_25 = VF_52 * (A513/A2);
     VF_35 = VF_53 * (A513/A3);
     VF_45 = VF_54 * (A513/A4);
-    
-    % VF_12 Roof -> Wall
-    VF_12 = 1 - VF_13 - VF_14 - VF_15;
-    
-    % VF_21 Wall -> Roof
-    VF_21 = VF_12 * (A1/A2);
     
     % ========================= Radiosity ========================
     Q_arcRAD = 0.75 * P_arc;
@@ -1238,7 +1064,7 @@ for step = 1:secs/ts
     % ====================== Total Heat Flow =====================
     
     Q_lScchem = (dH_Ta + dH_Tb + dH_Tc + dH_Td + dH_Te + dH_Tf + dH_Tg ...
-    + dH_Ti + dH_Tj + dH_Tk + dH_Tl + dH_Tm + dH_Tp);
+    + dH_Ti + dH_Tj + dH_Tk + dH_Tl + dH_Tm + dH_Tp) * 0.06;
     
     % Net heat flow in solid steel zone (sSc)
     % CO post combustion and Oxygen burner neglected
@@ -1257,7 +1083,7 @@ for step = 1:secs/ts
     Q_lSl = Q_lSclSl + Q_sSclSl - Q_lSlgas - Q_lSlwater;
     
     % Gas zone energy balance
-    Q_gas = Q_arcgas + Q_sScgas + Q_lScgas + Q_lSlgas - Q_gaswater;
+    Q_gas = Q_arcgas + + Q_sScgas + Q_lScgas + Q_lSlgas - Q_gaswater;
     
     
     % ==================== Temperature Change ====================
@@ -1300,7 +1126,7 @@ for step = 1:secs/ts
         (lambda_C + Cp_C * (T_melt - T_air));
     
     % Melt rate of solid metal (kg/s)
-    dm_sSc = ((Q_sSc*(T_sSc/T_melt)) / (lambda_sSc + Cp_sSc*(T_melt - T_sSc)));
+    dm_sSc = ((Q_sSc*(T_sSc/T_melt)) / ((lambda_sSc + Cp_sSc*(T_melt - T_sSc))/M_Fe));
     Q_sSc = Q_sSc - dm_sSc * lambda_sSc;
     T_sSc = T_sSc + dT_sSc * ts;
     T_lSc = (T_lSc * m_lSc + T_melt * dm_sSc * ts) / (m_lSc + dm_sSc * ts);
@@ -1329,7 +1155,7 @@ for step = 1:secs/ts
     m_MnO_lSl = m_MnO_lSl + (dm_sSc*MX_MnO_sSc*ts);
     
     % Melt rate of solid slag (kg/s)
-    dm_sSl = (Q_sSl*(T_sSl/T_melt)) / ((lambda_sSl + Cp_sSl*(T_melt - T_sSl))/M_sSl);
+    dm_sSl = (Q_sSl*(T_sSl/T_melt)) / ((lambda_sSl + Cp_sSl*(T_melt - T_sSl)));
     Q_sSl = Q_sSl - dm_sSl * lambda_sSl;
     T_sSl = T_sSl + dT_sSl * ts;
     T_lSl = (T_lSl * m_lSl + T_melt * dm_sSl * ts) / (m_lSl + dm_sSl * ts);
@@ -1363,7 +1189,7 @@ for step = 1:secs/ts
     h_arc = h_eafup - h_electrode - (h_lSc + h_lSl);
 
     % height of wall
-    h_wall = h_eafup + h_eaflow - h_sSc1 - h_lSc - h_lSl;
+    h_wall = h_eafup - h_sSc1;
     
     % Exposure Coeff.
     K_sSclSc = 0.5*tanh(5*(h_lSc-h_sSc1-h_sSc2+h_cone)) + 0.5;
@@ -1395,13 +1221,11 @@ for step = 1:secs/ts
     % C + 1/2 O2 -> CO
     m_C_lSc = m_C_lSc - (r_C_hO2 * M_C * ts);
     m_CO = m_CO + (r_C_hO2 * M_CO * ts);
-    m_O2 = m_O2 - 0.5*(r_C_hO2 * M_O2 * ts);
     
     % To carbon dioxide
     % C + O2 -> CO2
     m_C_lSc = m_C_lSc - (r_C_O2 * M_C * ts);
     m_CO2 = m_CO2 + (r_C_O2 * M_CO2 * ts);
-    m_O2 = m_O2 - (r_C_O2 * M_O2 * ts);
     
     % -------- MnO Decarburization ----------
     
@@ -1427,7 +1251,6 @@ for step = 1:secs/ts
     
     m_Si_lSc = m_Si_lSc - (r_Si_O2 * M_Si * ts);
     m_SiO2_lSl = m_SiO2_lSl + (r_Si_O2 * M_SiO2 * ts);
-    m_O2 = m_O2 - (r_Si_O2 * M_O2 * ts);
     
     % ------- Si reaction with MnO --------
     
@@ -1462,7 +1285,6 @@ for step = 1:secs/ts
     
     m_Cr_lSc = m_Cr_lSc - 2*(r_2Cr_3hO2 * M_Cr * ts);
     m_Cr2O3_lSl = m_Cr2O3_lSl + (r_2Cr_3hO2 * M_Cr2O3 * ts);
-    m_O2 = m_O2 - 1.5*(r_2Cr_3hO2 * M_O2 * ts);
     
     % -------- Phosphorus Oxidation --------
     
@@ -1485,7 +1307,6 @@ for step = 1:secs/ts
     % C9H20 + 14O2 -> 9CO2 + 10H2O
     
     m_comb_sSc = m_comb_sSc - (r_comb * M_C9H20 * ts);
-    m_O2 = m_O2 - 14*(r_comb * M_O2 * ts);
     m_CO = m_CO + 9*(r_comb * M_CO2 * ts);
     m_H2O = m_H2O + 10*(r_comb * M_H2O * ts);
     
@@ -1497,13 +1318,6 @@ for step = 1:secs/ts
     m_CO = m_CO - 2*(r_post * M_CO * ts);
     m_CO2 = m_CO2 + (r_post * M_CO2 * ts);
     
-    % --------- Electrode Oxidation ----------
-    
-    % C + O2 -> CO2
-    
-    m_O2 = m_O2 - ((dm_el*M_O2)/M_C) * ts;
-    m_CO2 = m_CO2 + ((dm_el*M_CO2)/M_C) * ts;
-    
     % ======================= Material Addition ======================
     
     % ------------ Solid Metal ------------
@@ -1512,40 +1326,21 @@ for step = 1:secs/ts
     m_sSc = m_Fe_sSc + m_C_sSc + m_Cr_sSc + m_Mn_sSc + m_P_sSc + m_SiO2_sSc ...
         + m_Al2O3_sSc + m_CaO_sSc + m_MgO_sSc + m_MnO_sSc + m_Si_sSc + m_comb_sSc;
     
-    % Addition of DRI
-    m_Fe_sSc = m_Fe_sSc + (DRI_add*ts) * MX_Fe_DRI;
-    m_C_sSc = m_C_sSc + (DRI_add*ts) * MX_C_DRI;
-    m_SiO2_sSc = m_SiO2_sSc + (DRI_add*ts) * MX_SiO2_DRI;
-    m_Al2O3_sSc = m_Al2O3_sSc + (DRI_add*ts) * MX_Al2O3_DRI;
-    m_CaO_sSc = m_CaO_sSc + (DRI_add*ts) * MX_CaO_DRI;
-    m_MgO_sSc = m_MgO_sSc + (DRI_add*ts) * MX_MgO_DRI;
-    m_MnO_sSc = m_MnO_sSc + (DRI_add*ts) * MX_MnO_DRI;
-    
-    % Addition of scrap
-    m_Fe_sSc = m_Fe_sSc + (scr_add*ts) * MX_Fe_scr;
-    m_C_sSc = m_C_sSc + (scr_add*ts) * MX_C_scr;
-    m_Si_sSc = m_Si_sSc + (scr_add*ts) * MX_Si_scr;
-    m_Cr_sSc = m_Cr_sSc + (scr_add*ts) * MX_Cr_scr;
-    m_P_sSc = m_P_sSc + (scr_add*ts) * MX_P_scr;
-    m_Mn_sSc = m_Mn_sSc + (scr_add*ts) * MX_Mn_scr;
-    m_comb_sSc = m_comb_sSc + (scr_add*ts) * MX_comb_scr;
-    
-    T_sSc = (T_sSc * m_sSc + T_scr * scr_add * ts + T_DRI * DRI_add * ts) / (m_sSc + slg_add * ts + DRI_add * ts);
-    
     % ------------ Solid Slag ------------
+    
+    if step > 400000
     m_CaO_sSl = m_CaO_sSl + (slg_add*ts) * MX_CaO_slg;
     m_MgO_sSl = m_MgO_sSl + (slg_add*ts) * MX_MgO_slg;
     m_SiO2_sSl = m_SiO2_sSl + (slg_add*ts) * MX_SiO2_slg;
     m_Al2O3_sSl = m_Al2O3_sSl + (slg_add*ts) * MX_Al2O3_slg;
     
     T_sSl = (T_sSl * m_sSl + T_slg * slg_add * ts) / (m_sSl + slg_add * ts);
+    end
     
     % ------ Extra Material Addition -----
     
     % Oxygen Lance
     m_O2 = m_O2 + O2_lance * ts;
-    
-    T_gas = (T_gas * m_gas + T_air * O2_lance * ts) / (m_gas + O2_lance * ts);
     
     % Carbon injection
     m_CL = m_CL + (C_inj * ts);
@@ -1554,22 +1349,6 @@ for step = 1:secs/ts
     m_Mn_sSc = m_Mn_sSc + (Mn_inj * ts);
     
     % ======================== Take out ========================
-%     thres_gas = (121590*V_gas) / (R * T_gas);
-% 
-%     if XM_gas > thres_gas
-%         gas_out = XM_gas - thres_gas;
-%         H2O_out = gas_out * X_H2O;
-%         CO2_out = gas_out * X_CO2;
-%         CO_out = gas_out * X_CO;
-%         O2_out = gas_out * X_O2;
-%         
-%         m_H2O = m_H2O - (H2O_out*M_H2O);
-%         m_CO2 = m_CO2 - (CO2_out*M_CO2);
-%         m_CO = m_CO - (CO_out*M_CO);
-%         m_O2 = m_O2 - (O2_out*M_O2);
-%         
-%         T_gas = (T_gas * XM_gas + T_air * gas_out) / (XM_gas + gas_out);
-%     end
 
     % Off gas venting
     m_CO = m_CO - (hd*u1*MX_CO)/(k_U*u2+hd) * ts;
@@ -1584,32 +1363,8 @@ for step = 1:secs/ts
         -1.5*r_2Cr_3hO2 * M_O2 - 14*r_comb * M_O2 + (O2_post - r_post*M_O2);
     dm_H2O = 10*r_comb * M_H2O;
     
-    rp = (R*T_gas/V_gas)*(dm_CO/M_CO + dm_CO2/M_CO2 + dm_O2/M_O2 + dm_H2O/M_H2O) ...
-        + (R*dT_gas/V_gas)*(m_CO/M_CO + m_CO2/M_CO2 + m_O2/M_O2 + m_H2O/M_H2O);
-
-    if mod(step, out/ts) == 0
-        
-        % Take out liquid metal
-        lSc_out = m_lSc * 0.5;
-        m_Fe_lSc = m_Fe_lSc - lSc_out * MX_Fe_lSc;
-        m_C_lSc = m_C_lSc - lSc_out * MX_C_lSc;
-        m_Si_lSc = m_Si_lSc - lSc_out * MX_Si_lSc;
-        m_Cr_lSc = m_Cr_lSc - lSc_out * MX_Cr_lSc;
-        m_Mn_lSc = m_Mn_lSc - lSc_out * MX_Mn_lSc;
-        m_P_lSc = m_P_lSc - lSc_out * MX_P_lSc;
-
-        % Take out liquid slag
-        lSl_out = m_lSl * 0.5;
-        m_Al2O3_lSl = m_Al2O3_lSl - lSl_out * MX_Al2O3_lSl;
-        m_CaO_lSl = m_CaO_lSl - lSl_out * MX_CaO_lSl;
-        m_Cr2O3_lSl = m_Cr2O3_lSl - lSl_out * MX_Cr2O3_lSl;
-        m_FeO_lSl = m_FeO_lSl - lSl_out * MX_FeO_lSl;
-        m_MgO_lSl = m_MgO_lSl - lSl_out * MX_MgO_lSl;
-        m_MnO_lSl = m_MnO_lSl - lSl_out * MX_MnO_lSl;
-        m_P2O5_lSl = m_P2O5_lSl - lSl_out * MX_P2O5_lSl;
-        m_SiO2_lSl = m_SiO2_lSl - lSl_out * MX_SiO2_lSl;
-        
-    end 
+    rp = (8.314*T_gas/V_gas)*(dm_CO/M_CO + dm_CO2/M_CO2 + dm_O2/M_O2 + dm_H2O/M_H2O) ...
+        + (8.314*dT_gas/V_gas)*(m_CO/M_CO + m_CO2/M_CO2 + m_O2/M_O2 + m_H2O/M_H2O);
     
     % ===================== For Graph =======================
     if mod(step, 1/ts) == 0
@@ -1642,22 +1397,11 @@ plot(time, lSl_temp)
 legend('Gas', 'Solid Metal', 'Solid Slag', 'Liquid Metal', 'Liquid Slag')
 hold off
 
-% figure
-% plot(time, steel_Fe)
-
-% figure
-% plot(time, rel_pres)
-
 figure
 plot(time, m_solid)
 hold on
-plot(time, m_solid_slag)
-legend('solid', 'solid slag')
-hold off
-
-figure
 plot(time, m_liquid)
-hold on
+plot(time, m_solid_slag)
 plot(time, m_liquid_slag)
-legend('liquid', 'liquid slag')
+legend('solid', 'liquid', 'solid slag', 'liquid slag')
 hold off
