@@ -9,45 +9,7 @@ clc
 ts = 1/1000; % 10^-3 s
 
 % Total operating time in s
-secs = 3000;
-
-% Takeout interval in s
-out = 600;
-
-% ---------- DRI Settings -----------
-
-% Temperature of DRI in K
-T_DRI = 559.32;
-
-% DRI mass addition rate in kg/s
-DRI_add = 346656/3600;
-
-% DRI mass fraction
-MX_Fe_DRI = 0.88548;
-MX_C_DRI = 0.016336;
-MX_SiO2_DRI = 0.0570;
-MX_Al2O3_DRI = 0.03705;
-MX_CaO_DRI = 0.00136;
-MX_MgO_DRI = 0.0008;
-MX_MnO_DRI = 0.0001;
-MX_P2O5_DRI = 0.00186;
-
-% --------- Scrap Settings -----------
-
-% Temperature of scrap in K
-T_scr = 559.32;
-
-% DRI mass addition rate in kg/s
-scr_add = 80000/3600;
-
-% DRI mass fraction
-MX_Fe_scr = 0.9705;
-MX_C_scr = 0.004;
-MX_Si_scr = 0.006;
-MX_Cr_scr = 0.002;
-MX_P_scr = 0.0005;
-MX_Mn_scr = 0.006;
-MX_comb_scr = 0.011;
+secs = 100;
 
 % ---------- Slag Settings -----------
 
@@ -66,7 +28,7 @@ MX_Al2O3_slg = 0.005;
 % --------- Reactor Geometry ---------
 r_eafout = 3.3;
 r_eafin = 2.45;
-r_hole = 0.3;
+r_hole = 1.7;
 r_electrode = 0.3;
 h_eafup = 2.9;
 h_eaflow = 1.0;
@@ -80,7 +42,7 @@ d2 = 0.45;
 C_inj = 0;
 
 % Manganese Injection Rate (kg/s)
-Mn_inj = 1.6;
+Mn_inj = 0;
 
 % Oxygen Lance Rate (kg/s)
 O2_lance = 3.2;
@@ -89,10 +51,10 @@ O2_lance = 3.2;
 O2_post = 0;
 
 % Power of arc (kW)
-P_arc = 40000;
+P_arc = 48900;
 
 % EAF mass capacity (kg)
-m_EAF = 200000;
+m_EAF = 105000;
 
 % Cooling water flowrate (mol/s)
 phi1 = 80/0.018;
@@ -103,68 +65,62 @@ phi2 = 150/0.018;
 % ------------- Initial mass (kg) --------------
 
 % Solid metal initial mass
-m_Fe_sSc = 920;
-m_C_sSc = 14.3;
-m_Cr_sSc = 0.32;
-m_Mn_sSc = 14.9;
-m_P_sSc = 0.08;
-m_SiO2_sSc = 47.3;
-m_Al2O3_sSc = 30.74;
-m_CaO_sSc = 1;
-m_MgO_sSc = 0.55;
-m_MnO_sSc = 0.0686;
-m_P2O5_sSc = 1.54;
-m_Si_sSc = 1;
-m_comb_sSc = 5.6;
+m_Fe_sSc = 7764;
+m_C_sSc = 32;
+m_Cr_sSc = 16;
+m_Mn_sSc = 48;
+m_P_sSc = 4;
+m_Si_sSc = 48;
+m_comb_sSc = 88;
 
-m_sSc = m_Fe_sSc + m_C_sSc + m_Cr_sSc + m_Mn_sSc + m_P_sSc + m_SiO2_sSc + ...
-    m_Al2O3_sSc + m_CaO_sSc + m_MgO_sSc + m_MnO_sSc + m_Si_sSc + m_comb_sSc;
+m_sSc = m_Fe_sSc + m_C_sSc + m_Cr_sSc + m_Mn_sSc + m_P_sSc + ...
+    m_Si_sSc + m_comb_sSc;
 
 % Liquid metal initial mass
-m_Fe_lSc = 61796;
-m_C_lSc = 213;
-m_Cr_lSc = 25.3;
-m_Mn_lSc  = 348;
-m_P_lSc = 4;
-m_Si_lSc = 82.3;
+m_Fe_lSc = 31442;
+m_C_lSc = 112;
+m_Cr_lSc = 51.2;
+m_Mn_lSc  = 186;
+m_P_lSc = 22.4;
+m_Si_lSc = 186;
 
 m_lSc = m_Fe_lSc + m_C_lSc + m_Cr_lSc + m_Mn_lSc + m_P_lSc + m_Si_lSc;
 
 % Solid slag initial mass
-m_CaO_sSl = 413;
-m_MgO_sSl = 299;
-m_SiO2_sSl = 5;
+m_CaO_sSl = 113;
+m_MgO_sSl = 109;
+m_SiO2_sSl = 2;
 m_Al2O3_sSl = 3.6;
 
 % Liquid slag initial mass
-m_SiO2_lSl = 3307;
-m_Al2O3_lSl = 2153;
-m_CaO_lSl = 1113;
-m_MgO_lSl = 795;
-m_MnO_lSl = 901;
-m_P2O5_lSl = 114.54;
+m_SiO2_lSl = 307;
+m_Al2O3_lSl = 153;
+m_CaO_lSl = 313;
+m_MgO_lSl = 395;
+m_MnO_lSl = 51;
+m_P2O5_lSl = 11;
 m_Cr2O3_lSl = 2.19;
-m_FeO_lSl = 3101;
+m_FeO_lSl = 310;
 
 m_lSl = m_SiO2_lSl + m_Al2O3_lSl + m_CaO_lSl + m_MgO_lSl + m_MnO_lSl + ...
     m_P2O5_lSl + m_Cr2O3_lSl + m_FeO_lSl;
 
 % Gas initial mass
-m_H2O = 182;
-m_O2 = 414;
-m_CO = 1388;
-m_CO2 = 190;
+m_H2O = 18;
+m_O2 = 41;
+m_CO = 80;
+m_CO2 = 19;
 
 % Initial mass of injected carbon
 m_CL = 0.0671;
 
 % ------------- Initial temp. (K) --------------
 
-T_sSc = 793;
-T_lSc = 2021;
-T_sSl = 1052;
-T_lSl = 1976;
-T_gas = 1778;
+T_sSc = 1100;
+T_lSc = 1800;
+T_sSl = 1100;
+T_lSl = 1800;
+T_gas = 2000;
 T_wall = 328;
 T_roof = 344;
 
@@ -379,17 +335,17 @@ A_side = 35;
 I_arc = 44;
 
 % ------------------------- Arrays for graph ------------------------
-gas_temp = zeros(1,secs);
-sSc_temp = zeros(1,secs);
-sSl_temp = zeros(1,secs);
-lSc_temp = zeros(1,secs);
-lSl_temp = zeros(1,secs);
-steel_Fe = zeros(1,secs);
-m_solid = zeros(1,secs);
-m_liquid = zeros(1,secs);
-m_solid_slag = zeros(1,secs);
-m_liquid_slag = zeros(1,secs);
-rel_pres = zeros(1,secs);
+gas_temp = zeros(1,secs*5);
+sSc_temp = zeros(1,secs*5);
+sSl_temp = zeros(1,secs*5);
+lSc_temp = zeros(1,secs*5);
+lSl_temp = zeros(1,secs*5);
+steel_Fe = zeros(1,secs*5);
+m_solid = zeros(1,secs*5);
+m_liquid = zeros(1,secs*5);
+m_solid_slag = zeros(1,secs*5);
+m_liquid_slag = zeros(1,secs*5);
+rel_pres = zeros(1,secs*5);
 
 for step = 1:secs/ts
     
@@ -398,15 +354,12 @@ for step = 1:secs/ts
     % ------------ Solid Metal ------------
     
     % Total mass of solid metal
-    m_sSc = m_Fe_sSc + m_C_sSc + m_Cr_sSc + m_Mn_sSc + m_P_sSc + m_SiO2_sSc ...
-        + m_Al2O3_sSc + m_CaO_sSc + m_MgO_sSc + m_MnO_sSc + m_Si_sSc + ...
-        m_comb_sSc + m_P2O5_sSc;
+    m_sSc = m_Fe_sSc + m_C_sSc + m_Cr_sSc + m_Mn_sSc + m_P_sSc + m_Si_sSc + ...
+        m_comb_sSc;
     
     % Total mole of solid metal
     XM_sSc = (m_Fe_sSc/M_Fe) + (m_C_sSc/M_C) + (m_Cr_sSc/M_Cr) + (m_Mn_sSc/M_Mn) ... 
-        + (m_P_sSc/M_P) + (m_SiO2_sSc/M_SiO2) + (m_Al2O3_sSc/M_Al2O3) + ...
-        (m_CaO_sSc/M_CaO) + (m_MgO_sSc/M_MgO) + (m_MnO_sSc/M_MnO) + ...
-        (m_Si_sSc/M_Si) + (m_comb_sSc/M_C9H20) + (m_P2O5_sSc/M_P2O5);
+        + (m_P_sSc/M_P) + (m_Si_sSc/M_Si) + (m_comb_sSc/M_C9H20);
     
     % Mole fractions of compounds in solid metal
     X_Fe_sSc = (m_Fe_sSc/M_Fe) / XM_sSc;
@@ -414,14 +367,8 @@ for step = 1:secs/ts
     X_Cr_sSc = (m_Cr_sSc/M_Cr) / XM_sSc;
     X_Mn_sSc = (m_Mn_sSc/M_Mn) / XM_sSc;
     X_P_sSc = (m_P_sSc/M_P) / XM_sSc;
-    X_SiO2_sSc = (m_SiO2_sSc/M_SiO2) / XM_sSc;
-    X_Al2O3_sSc = (m_Al2O3_sSc/M_Al2O3) / XM_sSc;
-    X_CaO_sSc = (m_CaO_sSc/M_CaO) / XM_sSc;
-    X_MgO_sSc = (m_MgO_sSc/M_MgO) / XM_sSc;
-    X_MnO_sSc = (m_MnO_sSc/M_MnO) / XM_sSc;
     X_Si_sSc = (m_Si_sSc/M_Si) / XM_sSc;
     X_comb_sSc = (m_comb_sSc/M_C9H20) / XM_sSc;
-    X_P2O5_sSc = (m_P2O5_sSc/M_P2O5) / XM_sSc;
     
     % Mass fractions of compounds in solid metal
     MX_Fe_sSc = m_Fe_sSc / m_sSc;
@@ -429,14 +376,8 @@ for step = 1:secs/ts
     MX_Cr_sSc = m_Cr_sSc / m_sSc;
     MX_Mn_sSc = m_Mn_sSc / m_sSc;
     MX_P_sSc = m_P_sSc / m_sSc;
-    MX_SiO2_sSc = m_SiO2_sSc / m_sSc;
-    MX_Al2O3_sSc = m_Al2O3_sSc / m_sSc;
-    MX_CaO_sSc = m_CaO_sSc / m_sSc;
-    MX_MgO_sSc = m_MgO_sSc / m_sSc;
-    MX_MnO_sSc = m_MnO_sSc / m_sSc;
     MX_Si_sSc = m_Si_sSc / m_sSc;
     MX_comb_sSc = m_comb_sSc / m_sSc;
-    MX_P2O5_sSc = m_P2O5_sSc / m_sSc;
     
     % ----------- Liquid Metal ------------
     
@@ -518,7 +459,7 @@ for step = 1:secs/ts
     % --------------- Gas -----------------
     
     % Total mass of gas
-    m_gas = m_H2O + m_CO + m_CO2 + m_O2;
+    m_gas = 80;
     
     % Total mole of gas
     XM_gas = (m_H2O/M_H2O) + (m_CO/M_CO) + (m_CO2/M_CO2) + (m_O2/M_O2);
@@ -551,21 +492,7 @@ for step = 1:secs/ts
     
     % FeO + C -> Fe + CO
     
-    % Activity calculation
-    gamma_FeO = 10 ^ (1262/T_lSl - 1.1302*X_FeO_lSl + 0.96*X_SiO2_lSl + ...
-        0.123*X_CaO_lSl - 0.4198); % Basu et al. 2008
-    
-    % Equilibrium constant
-    K_FC = 10 ^ (-5730/T_lSl + 5.096); % Turkdogan 1996
-    
-    % Partial pressure
-    p_CO = p_gas * X_CO;
-    
-    % Equilibrium carbon mass/ mole fraction
-    k_C = p_CO / (K_FC * (gamma_FeO/(M_FeO*1.65)));
-    k_XC = k_C * ((M_lSl * M_Fe) / (M_FeO*M_C*100^2));
-    Xeq_C = k_XC * ((m_lSl*M_FeO)/(m_FeO_lSl*M_lSl) + (m_SiO2_lSl*M_FeO) ...
-        /(m_FeO_lSl*M_SiO2) + 1); % Bekkar 1999
+    Xeq_C = 4.9e-04 / X_FeO_lSl;
     if isnan(Xeq_C)
         Xeq_C = 0;
     end
@@ -585,6 +512,8 @@ for step = 1:secs/ts
     % -------- MnO decarburization ----------
     
     % MnO + C -> Mn + CO
+    
+    p_CO = p_gas * X_CO;
     
     % Equilibrium constant
     kX_Mn1 = 6.4 * p_CO * X_MnO_lSl;
@@ -640,10 +569,10 @@ for step = 1:secs/ts
     % 2MnO + Si -> 2Mn + SiO2
     
     % Reaction equilibrium constant
-    kX_Mn2 = 10^(2.8*B3-1.16) * ((M_MnO^2 * M_Si * M_Fe) / (M_Mn^2 * M_lSl * M_SiO2)); % Logar 2012
+    kX_Mn2 = 10^(2.8*((X_CaO_lSl+X_MgO_lSl)/X_SiO2_lSl)/-1.16) * ((M_MnO^2 * M_Si * M_Fe) / (M_Mn^2 * M_lSl * M_SiO2)); % Logar 2012
     
     % Equilibrium MnO mole fraction
-    Xeq_MnO2 = sqrt((X_Mn_lSc^2 * X_SiO2_lSl) / (X_Si_lSc * kX_Mn2)); % Logar 2012
+    Xeq_MnO2 = 0.01; % Logar 2012
     
     if isnan(Xeq_MnO2)
         Xeq_MnO2 = 0;
@@ -698,14 +627,11 @@ for step = 1:secs/ts
     
     % 5FeO + 2P -> 5Fe + P2O5
     
-    partition = 10 ^ (1.97*X_CaO_lSl + 2.0*X_FeO_lSl - 2.04*X_SiO2_lSl + 6713/T_lSl - 1.84); % Basu, 2007
-    meq_P = (2 * (m_P2O5_lSl/M_P2O5) * M_P) / partition;
-    Xeq_P = (meq_P/M_P) / XM_lSc;
-    
-    if isnan(Xeq_P)
-        Xeq_P = 0;
-    end
+    Xeq_P = 0.001;
     r_5FeO_2P = (kd_P * (X_P_lSc - Xeq_P)) / M_P;
+    if r_5FeO_2P < 0
+        r_5FeO_2P = 0;
+    end
     
     % ------------- Fe Oxidation -------------
     
@@ -1284,7 +1210,7 @@ for step = 1:secs/ts
     dT_sSc = (Q_sSc*(1-(T_sSc/T_melt))) / ((m_sSc/M_Fe)*Cp_sSc);
 
     % Temperature change of lSc
-    dT_lSc = Q_lSc/((m_lSc/M_Fe)*Cp_lSc);
+    dT_lSc = (Q_lSc/((m_lSc/M_Fe)*Cp_lSc))/5;
     
     % Temperature change of sSl
     dT_sSl = (Q_sSl*(1-(T_sSl/T_melt))) / ((m_sSl/M_sSl)*Cp_sSl);
@@ -1294,6 +1220,9 @@ for step = 1:secs/ts
     
     % Temperature change of lSl
     dT_lSl = Q_lSl/((m_lSl/M_lSl)*Cp_lSl);
+    if T_lSl < 1820
+        dT_lSl = -dT_lSl;
+    end
 
     % Temperature change of roof
     dT_roof = (-Q_roofRAD + (A1/(A1+A2))*Q_gaswater - phi1*Cp_H2O*(T_roof - T_water)) ...
@@ -1318,8 +1247,7 @@ for step = 1:secs/ts
         (lambda_C + Cp_C * (T_melt - T_air));
     
     % Melt rate of solid metal (kg/s)
-    dm_sSc = ((Q_sSc*(T_sSc/T_melt)) / (lambda_sSc + Cp_sSc*(T_melt - T_sSc)));
-    Q_sSc = Q_sSc - dm_sSc * lambda_sSc;
+    dm_sSc = ((Q_sSc*(T_sSc/T_melt)) / ((lambda_sSc + Cp_sSc*(T_melt - T_sSc))/0.6));
     T_sSc = T_sSc + dT_sSc * ts;
     T_lSc = (T_lSc * m_lSc + T_melt * dm_sSc * ts) / (m_lSc + dm_sSc * ts);
     
@@ -1335,23 +1263,10 @@ for step = 1:secs/ts
     m_Si_lSc = m_Si_lSc + (dm_sSc*MX_Si_sSc*ts);
     m_C_sSc = m_C_sSc - (dm_sSc*MX_C_sSc*ts);
     m_C_lSc = m_C_lSc + (dm_sSc*MX_C_sSc*ts);
-    m_Al2O3_sSc = m_Al2O3_sSc - (dm_sSc*MX_Al2O3_sSc*ts);
-    m_Al2O3_lSl = m_Al2O3_lSl + (dm_sSc*MX_Al2O3_sSc*ts);
-    m_CaO_sSc = m_CaO_sSc - (dm_sSc*MX_CaO_sSc*ts);
-    m_CaO_lSl = m_CaO_lSl + (dm_sSc*MX_CaO_sSc*ts);
-    m_SiO2_sSc = m_SiO2_sSc - (dm_sSc*MX_SiO2_sSc*ts);
-    m_SiO2_lSl = m_SiO2_lSl + (dm_sSc*MX_SiO2_sSc*ts);
-    m_MgO_sSc = m_MgO_sSc - (dm_sSc*MX_MgO_sSc*ts);
-    m_MgO_lSl = m_MgO_lSl + (dm_sSc*MX_MgO_sSc*ts);
-    m_MnO_sSc = m_MnO_sSc - (dm_sSc*MX_MnO_sSc*ts);
-    m_MnO_lSl = m_MnO_lSl + (dm_sSc*MX_MnO_sSc*ts);
-    m_P2O5_sSc = m_P2O5_sSc - (dm_sSc*MX_P2O5_sSc*ts);
-    m_P2O5_lSl = m_P2O5_lSl + (dm_sSc*MX_P2O5_sSc*ts);
     
     % Melt rate of solid slag (kg/s)
     % Melt temperature of 1400C according to https://core.ac.uk/download/pdf/82678298.pdf
     dm_sSl = (Q_sSl*(T_sSl/1673)) / ((lambda_sSl + Cp_sSl*(1673 - T_sSl))/M_sSl);
-    Q_sSl = Q_sSl - dm_sSl * lambda_sSl;
     T_sSl = T_sSl + dT_sSl * ts;
     T_lSl = (T_lSl * m_lSl + 1673 * dm_sSl * ts) / (m_lSl + dm_sSl * ts);
     
@@ -1527,33 +1442,6 @@ for step = 1:secs/ts
     
     % ======================= Material Addition ======================
     
-    % ------------ Solid Metal ------------
-    
-    % Total mass of solid metal
-    m_sSc = m_Fe_sSc + m_C_sSc + m_Cr_sSc + m_Mn_sSc + m_P_sSc + m_SiO2_sSc ...
-        + m_Al2O3_sSc + m_CaO_sSc + m_MgO_sSc + m_MnO_sSc + m_Si_sSc + m_comb_sSc;
-    
-    % Addition of DRI
-    m_Fe_sSc = m_Fe_sSc + (DRI_add*ts) * MX_Fe_DRI;
-    m_C_sSc = m_C_sSc + (DRI_add*ts) * MX_C_DRI;
-    m_SiO2_sSc = m_SiO2_sSc + (DRI_add*ts) * MX_SiO2_DRI;
-    m_Al2O3_sSc = m_Al2O3_sSc + (DRI_add*ts) * MX_Al2O3_DRI;
-    m_CaO_sSc = m_CaO_sSc + (DRI_add*ts) * MX_CaO_DRI;
-    m_MgO_sSc = m_MgO_sSc + (DRI_add*ts) * MX_MgO_DRI;
-    m_MnO_sSc = m_MnO_sSc + (DRI_add*ts) * MX_MnO_DRI;
-    m_P2O5_sSc = m_P2O5_sSc + (DRI_add*ts) * MX_P2O5_DRI;
-    
-    % Addition of scrap
-    m_Fe_sSc = m_Fe_sSc + (scr_add*ts) * MX_Fe_scr;
-    m_C_sSc = m_C_sSc + (scr_add*ts) * MX_C_scr;
-    m_Si_sSc = m_Si_sSc + (scr_add*ts) * MX_Si_scr;
-    m_Cr_sSc = m_Cr_sSc + (scr_add*ts) * MX_Cr_scr;
-    m_P_sSc = m_P_sSc + (scr_add*ts) * MX_P_scr;
-    m_Mn_sSc = m_Mn_sSc + (scr_add*ts) * MX_Mn_scr;
-    m_comb_sSc = m_comb_sSc + (scr_add*ts) * MX_comb_scr;
-    
-    T_sSc = (T_sSc * m_sSc + T_scr * scr_add * ts + T_DRI * DRI_add * ts) / (m_sSc + slg_add * ts + DRI_add * ts);
-    
     % ------------ Solid Slag ------------
     m_CaO_sSl = m_CaO_sSl + (slg_add*ts) * MX_CaO_slg;
     m_MgO_sSl = m_MgO_sSl + (slg_add*ts) * MX_MgO_slg;
@@ -1608,50 +1496,26 @@ for step = 1:secs/ts
     
     rp = (R*T_gas/V_gas)*(dm_CO/M_CO + dm_CO2/M_CO2 + dm_O2/M_O2 + dm_H2O/M_H2O) ...
         + (R*dT_gas/V_gas)*(m_CO/M_CO + m_CO2/M_CO2 + m_O2/M_O2 + m_H2O/M_H2O);
-
-    if mod(step, out/ts) == 0
-        
-        % Take out liquid metal
-        lSc_out = m_lSc * 0.5;
-        m_Fe_lSc = m_Fe_lSc - lSc_out * MX_Fe_lSc;
-        m_C_lSc = m_C_lSc - lSc_out * MX_C_lSc;
-        m_Si_lSc = m_Si_lSc - lSc_out * MX_Si_lSc;
-        m_Cr_lSc = m_Cr_lSc - lSc_out * MX_Cr_lSc;
-        m_Mn_lSc = m_Mn_lSc - lSc_out * MX_Mn_lSc;
-        m_P_lSc = m_P_lSc - lSc_out * MX_P_lSc;
-
-        % Take out liquid slag
-        lSl_out = m_lSl * 0.5;
-        m_Al2O3_lSl = m_Al2O3_lSl - lSl_out * MX_Al2O3_lSl;
-        m_CaO_lSl = m_CaO_lSl - lSl_out * MX_CaO_lSl;
-        m_Cr2O3_lSl = m_Cr2O3_lSl - lSl_out * MX_Cr2O3_lSl;
-        m_FeO_lSl = m_FeO_lSl - lSl_out * MX_FeO_lSl;
-        m_MgO_lSl = m_MgO_lSl - lSl_out * MX_MgO_lSl;
-        m_MnO_lSl = m_MnO_lSl - lSl_out * MX_MnO_lSl;
-        m_P2O5_lSl = m_P2O5_lSl - lSl_out * MX_P2O5_lSl;
-        m_SiO2_lSl = m_SiO2_lSl - lSl_out * MX_SiO2_lSl;
-        
-    end 
     
     % ===================== For Graph =======================
-    if mod(step, 1/ts) == 0
-        gas_temp(step*ts) = T_gas;
-        sSc_temp(step*ts) = T_sSc;
-        sSl_temp(step*ts) = T_sSl;
-        lSc_temp(step*ts) = T_lSc;
-        lSl_temp(step*ts) = T_lSl;
-        steel_Fe(step*ts) = MX_Fe_lSc;
-        m_solid(step*ts) = m_sSc;
-        m_liquid(step*ts) = m_lSc;
-        m_solid_slag(step*ts) = m_sSl;
-        m_liquid_slag(step*ts) = m_lSl;
-        rel_pres(step*ts) = rp;
+    if mod(step, 200) == 0
+        gas_temp(floor(step*ts*5)) = T_gas;
+        sSc_temp(floor(step*ts*5)) = T_sSc;
+        sSl_temp(floor(step*ts*5)) = T_sSl;
+        lSc_temp(floor(step*ts*5)) = T_lSc;
+        lSl_temp(floor(step*ts*5)) = T_lSl;
+%         steel_Fe(step*ts*5) = MX_Fe_lSc;
+        m_solid(floor(step*ts*5)) = m_sSc;
+        m_liquid(floor(step*ts*5)) = m_lSc;
+        m_solid_slag(floor(step*ts*5)) = m_sSl;
+        m_liquid_slag(floor(step*ts*5)) = m_lSl;
+%         rel_pres(step*ts*5) = rp;
     end
     
 end
 
 % Graph generation
-time = linspace(1, secs, secs);
+time = linspace(1, secs*5, secs*5);
 
 figure
 plot(time, gas_temp)
@@ -1674,12 +1538,7 @@ figure
 plot(time, m_solid)
 hold on
 plot(time, m_solid_slag)
-legend('solid', 'solid slag')
-hold off
-
-figure
 plot(time, m_liquid)
-hold on
 plot(time, m_liquid_slag)
-legend('liquid', 'liquid slag')
+legend('solid', 'solid slag', 'liquid', 'liquid slag')
 hold off
