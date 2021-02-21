@@ -86,7 +86,7 @@ Mn_inj = 1.6;
 O2_lance = 3.2;
 
 % O2 for post combustion (kg/s)
-O2_post = 0;
+O2_post = 1.5;
 
 % Power of arc (kW)
 P_arc = 40000;
@@ -103,48 +103,48 @@ phi2 = 150/0.018;
 % ------------- Initial mass (kg) --------------
 
 % Solid metal initial mass
-m_Fe_sSc = 920;
-m_C_sSc = 14.3;
-m_Cr_sSc = 0.32;
-m_Mn_sSc = 14.9;
-m_P_sSc = 0.08;
-m_SiO2_sSc = 47.3;
-m_Al2O3_sSc = 30.74;
-m_CaO_sSc = 1;
-m_MgO_sSc = 0.55;
-m_MnO_sSc = 0.0686;
-m_P2O5_sSc = 1.54;
-m_Si_sSc = 1;
+m_Fe_sSc = 1362;
+m_C_sSc = 21.2;
+m_Cr_sSc = 0.57;
+m_Mn_sSc = 22.1;
+m_P_sSc = 0.14;
+m_SiO2_sSc = 70;
+m_Al2O3_sSc = 45.5;
+m_CaO_sSc = 1.67;
+m_MgO_sSc = 0.98;
+m_MnO_sSc = 0.123;
+m_P2O5_sSc = 2.28;
+m_Si_sSc = 1.7;
 m_comb_sSc = 5.6;
 
 m_sSc = m_Fe_sSc + m_C_sSc + m_Cr_sSc + m_Mn_sSc + m_P_sSc + m_SiO2_sSc + ...
     m_Al2O3_sSc + m_CaO_sSc + m_MgO_sSc + m_MnO_sSc + m_P2O5_sSc + m_Si_sSc + m_comb_sSc;
 
 % Liquid metal initial mass
-m_Fe_lSc = 61796;
-m_C_lSc = 213;
-m_Cr_lSc = 25.3;
-m_Mn_lSc  = 348;
-m_P_lSc = 4;
-m_Si_lSc = 82.3;
+m_Fe_lSc = 61730;
+m_C_lSc = 230;
+m_Cr_lSc = 25.2;
+m_Mn_lSc  = 303;
+m_P_lSc = 3.3;
+m_Si_lSc = 67.6;
 
 m_lSc = m_Fe_lSc + m_C_lSc + m_Cr_lSc + m_Mn_lSc + m_P_lSc + m_Si_lSc;
 
 % Solid slag initial mass
-m_CaO_sSl = 413;
-m_MgO_sSl = 299;
-m_SiO2_sSl = 5;
-m_Al2O3_sSl = 3.6;
+m_CaO_sSl = 162.4;
+m_MgO_sSl = 117.6;
+m_SiO2_sSl = 2;
+m_Al2O3_sSl = 1.4;
 
 % Liquid slag initial mass
-m_SiO2_lSl = 3307;
+m_SiO2_lSl = 3338;
 m_Al2O3_lSl = 2153;
-m_CaO_lSl = 1113;
+m_CaO_lSl = 1119;
 m_MgO_lSl = 795;
-m_MnO_lSl = 901;
-m_P2O5_lSl = 114.54;
+m_MnO_lSl = 960;
+m_P2O5_lSl = 115.3;
 m_Cr2O3_lSl = 2.19;
-m_FeO_lSl = 3101;
+m_FeO_lSl = 3195;
 
 m_lSl = m_SiO2_lSl + m_Al2O3_lSl + m_CaO_lSl + m_MgO_lSl + m_MnO_lSl + ...
     m_P2O5_lSl + m_Cr2O3_lSl + m_FeO_lSl;
@@ -160,13 +160,13 @@ m_CL = 0.0671;
 
 % ------------- Initial temp. (K) --------------
 
-T_sSc = 793;
-T_lSc = 2021;
-T_sSl = 1052;
-T_lSl = 1976;
-T_gas = 1778;
+T_sSc = 791;
+T_lSc = 1859;
+T_sSl = 1095;
+T_lSl = 1807;
+T_gas = 1640;
 T_wall = 328;
-T_roof = 344;
+T_roof = 339;
 
 % -------------- Initial Geometry --------------
 
@@ -256,7 +256,7 @@ M_gas = 0.035;
 M_Al2O3 = 0.10196;
 M_Al = 0.02698;
 M_H2O = 0.01802;
-M_sSl = 0.0606;
+M_sSl = 0.0484;
 M_lSl = 0.0509;
 
 % ------------ Reaction rate constant -------------
@@ -515,6 +515,10 @@ for step = 1:secs/ts
     MX_Cr2O3_lSl = m_Cr2O3_lSl / m_lSl;
     MX_FeO_lSl = m_FeO_lSl / m_lSl;
     
+    % Molar mass of liquid slag [kg/mol]
+    M_lSl = X_SiO2_lSl*M_SiO2 + X_Al2O3_lSl*M_Al2O3 + X_CaO_lSl*M_CaO + X_MgO_lSl*M_MgO + ...
+        X_MnO_lSl*M_MnO + X_P2O5_lSl*M_P2O5 + X_Cr2O3_lSl*M_Cr2O3 + X_FeO_lSl*M_FeO;
+    
     % --------------- Gas -----------------
     
     % Total mass of gas
@@ -738,8 +742,8 @@ for step = 1:secs/ts
     % ------------ Dynamic heat capacity calculation ----------
     % Units in kJ/mol K
     
-    t_H2O = (T_gas-298)/1000;
     if T_gas < 500
+        t_H2O = (T_gas-298)/1000;
         CpdT_H2O = -203.6060*t_H2O + (1523.290/2)*(t_H2O^2) + (-3196.413/3)*(t_H2O^3) ...
         + (2474.455/4)*(t_H2O^4) - (3.855326)/t_H2O;
     elseif (500 <= T_gas) && (T_gas < 1700)
@@ -763,13 +767,13 @@ for step = 1:secs/ts
         CpdT_H2O = CpdT_H2O1 + CpdT_H2O2 + CpdT_H2O3; 
     end
     
-        t_C = (T_lSc-298)/1000;
-        CpdT_C = 21.17510*t_C + (-0.812428/2)*(t_C^2) + (0.448537/3)*(t_C^3) + (-0.043256/4)*(t_C^4) ...
-            - (-0.013103)/t_C;
+    t_C = (T_lSc-298)/1000;
+    CpdT_C = 21.17510*t_C + (-0.812428/2)*(t_C^2) + (0.448537/3)*(t_C^3) + (-0.043256/4)*(t_C^4) ...
+        - (-0.013103)/t_C;
         
-        t_C_gas = (T_gas-298)/1000;
-        CpdT_C_gas = 21.17510*t_C_gas + (-0.812428/2)*(t_C_gas^2) + (0.448537/3)*(t_C_gas^3) ...
-        + (-0.043256/4)*(t_C_gas^4) - (-0.013103)/t_C_gas;
+    t_C_gas = (T_gas-298)/1000;
+    CpdT_C_gas = 21.17510*t_C_gas + (-0.812428/2)*(t_C_gas^2) + (0.448537/3)*(t_C_gas^3) ...
+    + (-0.043256/4)*(t_C_gas^4) - (-0.013103)/t_C_gas;
     
     if T_lSc < 1650
         t_FeO = (T_lSc-298)/1000;
@@ -808,8 +812,8 @@ for step = 1:secs/ts
         + (-36.50624/4)*(t_O2_lSc^4) - (-0.007374)/t_O2_lSc;
     else
         t_O2_lSc1 = (700-298)/1000;
-        CpdT_O2_lSc1 = 31.32234*t_O2_lSc + (-20.23532/2)*(t_O2_lSc^2) + (57.86644/3)*(t_O2_lSc^3) ...
-        + (-36.50624/4)*(t_O2_lSc^4) - (-0.007374)/t_O2_lSc;
+        CpdT_O2_lSc1 = 31.32234*t_O2_lSc1 + (-20.23532/2)*(t_O2_lSc1^2) + (57.86644/3)*(t_O2_lSc1^3) ...
+        + (-36.50624/4)*(t_O2_lSc1^4) - (-0.007374)/t_O2_lSc1;
         t_O2_lSc2 = (T_lSc-700)/1000;
         CpdT_O2_lSc2 = 30.03235*t_O2_lSc2 + (8.772972/2)*(t_O2_lSc2^2) + (-3.988133/3)*(t_O2_lSc2^3) ...
         + (0.788313/4)*(t_O2_lSc2^4) - (-0.741599)/t_O2_lSc2;
@@ -901,7 +905,6 @@ for step = 1:secs/ts
         + ((1.005938e-8)/4)*(t_Mn4^5) - (5.623757e-8)/t_Mn5; 
         CpdT_Mn = CpdT_Mn_1 + CpdT_Mn_2 + CpdT_Mn_3 + CpdT_Mn_4 + CpdT_Mn_5;
     end
-        %NOT IN USE      CpdT_Mn = 0.040 * (T_lSc - 298); 
     
     if T_lSc < 847
         t_SiO2 = (T_lSc - 298)/1000;
@@ -911,9 +914,9 @@ for step = 1:secs/ts
         t_SiO2 = (847 - 298)/1000;
         CpdT_SiO2_1 = -6.076591*t_SiO2 + (251.6755/2)*(t_SiO2^2) + (-324.7964/3)*(t_SiO2^3) ...
         + (168.5604/4)*(t_SiO2^4) - (0.002548)/t_SiO2;
-        t_SiO22 = (T_lSc - 847)/1000;
-        CpdT_SiO2_2 = 58.75340*t_SiO22 + (10.27925/2)*(t_SiO22^2) + (-0.131384/3)*(t_SiO22^3) ...
-        + (0.025210/4)*(t_SiO22^4) - (0.025601)/t_SiO22;
+        t_SiO2_2 = (T_lSc - 847)/1000;
+        CpdT_SiO2_2 = 58.75340*t_SiO2_2 + (10.27925/2)*(t_SiO2_2^2) + (-0.131384/3)*(t_SiO2_2^3) ...
+        + (0.025210/4)*(t_SiO2_2^4) - (0.025601)/t_SiO2_2;
         CpdT_SiO2 = CpdT_SiO2_1 + CpdT_SiO2_2;
     end
     
@@ -925,8 +928,8 @@ for step = 1:secs/ts
         t_Si = (1685 - 298)/1000;
         CpdT_Si_1 = 22.81719*(t_Si) + (3.899510/2)*(t_Si^2) + (-0.082885/3)*(t_Si^3) ...
         + (0.042111/4)*(t_Si^4) - (-0.354063)/t_Si;
-        t_Si2 = (T_lSc - 1685)/1000;
-        CpdT_Si_2 = 27.19604*(t_Si2);
+        t_Si_2 = (T_lSc - 1685)/1000;
+        CpdT_Si_2 = 27.19604*(t_Si_2);
         CpdT_Si = CpdT_Si_1 + CpdT_Si_2;
     end
     
@@ -1334,7 +1337,7 @@ for step = 1:secs/ts
     
     % Net heat flow in liquid metal zone (lSc)
     % CO post combustion and Oxygen burner neglected
-    Q_lSc = (Q_arc + dH_Th)*K_sSclSc - Q_lScchem ...
+    Q_lSc = (Q_arc - dH_Th)*K_sSclSc - Q_lScchem ...
     - Q_lScsSc - Q_lScsSl - Q_lSclSl - Q_lScgas - Q_lScwater - Q_lScRAD;
     
     % Net heat flow in solid slag zone
@@ -1419,7 +1422,7 @@ for step = 1:secs/ts
     
     % Melt rate of solid slag (kg/s)
     % Melt temperature of 1400C according to https://core.ac.uk/download/pdf/82678298.pdf
-    dm_sSl = (Q_sSl*(T_sSl/1673)) / ((lambda_sSl + Cp_sSl*(1673 - T_sSl))/M_sSl);
+    dm_sSl = (Q_sSl*(T_sSl/T_melt)) / ((lambda_sSl + Cp_sSl*(T_melt - T_sSl))/M_sSl);
     Q_sSl = Q_sSl - dm_sSl * lambda_sSl;
     T_sSl = T_sSl + dT_sSl * ts;
     T_lSl = (T_lSl * m_lSl + 1673 * dm_sSl * ts) / (m_lSl + dm_sSl * ts);
