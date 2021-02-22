@@ -690,13 +690,13 @@ for step = 1:secs/ts
     end
     
     % Rate of reaction
-    r_3FeO_2Cr = (kd_Cr1 * (X_Cr_lSc - Xeq_Cr)) / M_Cr;
+    r_3FeO_2Cr = (2 * kd_Cr1 * (X_Cr_lSc - Xeq_Cr)) / M_Cr;
     
     % --------- Chromium Oxidation ---------
     
     % 2Cr + 3/2O2 -> Cr2O3
     
-    r_2Cr_3hO2 = (2*kd_Cr2 * (X_Cr_lSc - Xeq_Cr) * O2_lance * K_O2Cr2O3) / M_Cr;
+    r_2Cr_3hO2 = (2 * kd_Cr2 * (X_Cr_lSc - Xeq_Cr) * O2_lance * K_O2Cr2O3) / M_Cr;
     
     % ----- Phosphorus reaction with FeO -----
     
@@ -709,13 +709,13 @@ for step = 1:secs/ts
     if isnan(Xeq_P)
         Xeq_P = 0;
     end
-    r_5FeO_2P = (kd_P * (X_P_lSc - Xeq_P)) / M_P;
+    r_5FeO_2P = (2 * kd_P * (X_P_lSc - Xeq_P)) / M_P;
     
     % ------------- Fe Oxidation -------------
     
     % Fe + 1/2O2 -> FeO
     
-    r_Fe_hO2 = (2 * O2_lance * K_O2FeO) / M_O2;
+    r_Fe_hO2 = (O2_lance * K_O2FeO) / M_Fe;
     
     % ------------- Combustion ---------------
     
@@ -735,7 +735,7 @@ for step = 1:secs/ts
     
     % C + O2 -> CO2
     
-    dm_el = 3*(R_tip * (I_arc^2/3600) + R_side * (A_side/3600));
+    dm_el = 3*((R_tip * (I_arc^2/3600)) + (R_side * (A_side/3600)));
     
     % =================== Reaction Heat Transfer ====================
     
@@ -1004,7 +1004,7 @@ for step = 1:secs/ts
     % ----------------- Heat of reaction -----------------
     
     % a) Fe + 1/2O2 -> FeO
-    dH_Ta = r_Fe_hO2 * (dH_FeO + CpdT_FeO - CpdT_Fe - 0.5*CpdT_O2_lSc);
+    dH_Ta = r_Fe_hO2 * (dH_FeO + dH_FeS + CpdT_FeO - CpdT_Fe - 0.5*CpdT_O2_lSc);
 
     % b) FeO + C -> Fe + CO
     dH_Tb = (r_FeO_CL + r_FeO_CD) * (dH_CO - dH_CS - dH_FeO + CpdT_Fe + CpdT_CO_lSc - CpdT_C - CpdT_FeO);
@@ -1043,22 +1043,22 @@ for step = 1:secs/ts
 
     % l) Si + O2 -> SiO2
     dH_Tl = r_Si_O2 * ((dH_SiO2 + dH_SiO2S - dH_SiS) + ...
-        CpdT_SiO2 - CpdT_Si - 2*CpdT_O2_lSc);
+        CpdT_SiO2 - CpdT_Si - CpdT_O2_lSc);
 
     % m) 2Cr + 3/2O2 -> Cr2O3
     dH_Tm = r_2Cr_3hO2 * ((dH_Cr2O3 - 2*dH_CrS) + ...
         CpdT_Cr2O3 - 2*CpdT_Cr - 1.5*CpdT_O2_lSc);
 
-    % n) CH4 + 2O2 -> CO2 + 2H2O
-%     dH_Tn = -(CH4_inj/M_CH4) * ((dH_CO2 + 2*dH_H2O - dH_CH4) + ...
-%         (Cp_CO2 + 2*Cp_H2O - Cp_CH4 - 2*Cp_O2) * (T_gas - 298));
+    % Original n) removed; now n) = paper's p)
+    
+    % n) C9H20 + 14O2 -> 9CO2 + 10H2O
+    dH_Tn = r_comb * ((9*dH_CO2 + 10*dH_H2O - dH_C9H20) + ...
+        9*CpdT_CO2_gas + 10*CpdT_H2O - CpdT_C9H20 - 14*CpdT_O2_gas);
 
     % o) Graphite to CO2
-    dH_To = -(dm_el/M_C) * (dH_CO2 + CpdT_CO2_gas - CpdT_C_gas - CpdT_O2_gas);
+    dH_To = (dm_el/M_C) * (dH_CO2 + CpdT_CO2_gas - CpdT_C_gas - CpdT_O2_gas);
 
-    % p) C9H20 + 14O2 -> 9CO2 + 10H2O
-    dH_Tp = r_comb * ((9*dH_CO2 + 10*dH_H2O - dH_C9H20) + ...
-        9*CpdT_CO2_gas + 10*CpdT_H2O - CpdT_C9H20 - 14*CpdT_O2_gas);
+
     
     % ======================== Heat Transfer (kW) =========================
     
@@ -1179,10 +1179,10 @@ for step = 1:secs/ts
     b1 = H1^2 - R^2 + 1;
     b2 = H2^2 - R^2 + 1;
     
-    VF_511 = (b1/(8*R*H1)) + (1/(2*pi))*(acos(a1/b1) - (1/(2*H1))*sqrt((a1+2)^2/(R^2)-4) ...
-        *acos((a1*R)/b1) - (a1/(2*R*H1))*asin(R));
-    VF_512 = (b2/(8*R*H2)) + (1/(2*pi))*(acos(a2/b2) - (1/(2*H2))*sqrt((a2+2)^2/(R^2)-4) ...
-        *acos((a2*R)/b2) - (a2/(2*R*H2))*asin(R));
+    VF_511 = (b1/(8*R*H1)) + (1/(2*pi))*(acos(a1/b1) - (1/(2*H1))*sqrt((((a1+2)^2)/(R^2))-4)*acos((a1*R)/b1) ...
+        - (a1/(2*R*H1))*asin(R));
+    VF_512 = (b2/(8*R*H2)) + (1/(2*pi))*(acos(a2/b2) - (1/(2*H2))*sqrt((((a2+2)^2)/(R^2))-4)*acos((a2*R)/b2) ...
+        - (a2/(2*R*H2))*asin(R));
     
     A511 = 2*pi*r_electrode*(h_electrode + h_arc);
     A512 = 2*pi*r_electrode*h_electrode;
@@ -1198,26 +1198,26 @@ for step = 1:secs/ts
     
     aX = X^2 + R^2 - 1;
     bX = X^2 - R^2 + 1;
-    FX = (bX/(8*R*X)) + (1/(2*pi))*(acos(aX/bX) - (1/(2*X))*sqrt((aX+2)^2/(R^2)-4) ...
-        *acos((aX*R)/bX) - (aX/(2*R*X))*asin(R));
+    FX = (bX/(8*R*X)) + (1/(2*pi))*(acos(aX/bX) - (1/(2*X))*sqrt((((aX+2)^2)/(R^2))-4)*acos((aX*R)/bX) ...
+        - (aX/(2*R*X))*asin(R));
     if isnan(FX)
         FX = 0;
     end
     
     aLX = (L-X)^2 + R^2 - 1;
     bLX = (L-X)^2 - R^2 + 1;
-    FLX = (bLX/(8*R*(L-X))) + (1/(2*pi))*(acos(aLX/bLX) - (1/(2*(L-X)))*sqrt((aLX+2)^2/(R^2)-4) ...
-        *acos((aLX*R)/bLX) - (aLX/(2*R*(L-X)))*asin(R));
+    FLX = (bLX/(8*R*(L-X))) + (1/(2*pi))*(acos(aLX/bLX) - (1/(2*(L-X)))*sqrt((((aLX+2)^2)/(R^2))-4)*acos((aLX*R)/bLX) ...
+        - (aLX/(2*R*(L-X)))*asin(R));
     
     aYXL = (Y+X-L)^2 + R^2 - 1;
     bYXL = (Y+X-L)^2 - R^2 + 1;
-    FYXL = (bYXL/(8*R*(Y+X-L))) + (1/(2*pi))*(acos(aYXL/bYXL) - (1/(2*(Y+X-L)))*sqrt((aYXL+2)^2/(R^2)-4) ...
-        *acos((aYXL*R)/bYXL) - (aYXL/(2*R*(Y+X-L)))*asin(R));
+    FYXL = (bYXL/(8*R*(Y+X-L))) + (1/(2*pi))*(acos(aYXL/bYXL) - (1/(2*(Y+X-L)))*sqrt((((aYXL+2)^2)/(R^2))-4)*acos((aYXL*R)/bYXL) ...
+        - (aYXL/(2*R*(Y+X-L)))*asin(R));
     
     aXY = (X+Y)^2 + R^2 - 1;
     bXY = (X+Y)^2 - R^2 + 1;
-    FXY = (bXY/(8*R*(X+Y))) + (1/(2*pi))*(acos(aXY/bXY) - (1/(2*(X+Y)))*sqrt((aXY+2)^2/(R^2)-4) ...
-        *acos((aXY*R)/bXY) - (aXY/(2*R*(X+Y)))*asin(R));
+    FXY = (bXY/(8*R*(X+Y))) + (1/(2*pi))*(acos(aXY/bXY) - (1/(2*(X+Y)))*sqrt((((aXY+2)^2)/(R^2))-4)*acos((aXY*R)/bXY) ...
+        - (aXY/(2*R*(X+Y)))*asin(R));
     
     VF_52 = (1-K_slag) * ((X/L)*FX + ((L-X)/L)*(1-FLX) + ((Y+X-L)/L)*FYXL - ((X+Y)/L)*FXY);
     
@@ -1304,7 +1304,7 @@ for step = 1:secs/ts
         + VF_14*J_lSc + VF_15*Q_arcRAD));
 
     % Radiosity of wall
-    J_wall = (ep2*sig*T_wall^4/1000 + (1-ep2)*(VF_21*J_wall + VF_23*J_sSc ...
+    J_wall = (ep2*sig*T_wall^4/1000 + (1-ep2)*(VF_21*J_roof + VF_23*J_sSc ...
         + VF_24*J_lSc + VF_25*Q_arcRAD));
 
     % Radiosity of sSc
@@ -1335,7 +1335,7 @@ for step = 1:secs/ts
     % ====================== Total Heat Flow =====================
     
     Q_lScchem = (dH_Ta + dH_Tb + dH_Tc + dH_Td + dH_Te + dH_Tf + dH_Tg ...
-    + dH_Ti + dH_Tj + dH_Tk + dH_Tl + dH_Tm + dH_Tp);
+    + dH_Ti + dH_Tj + dH_Tk + dH_Tl + dH_Tm + dH_Tn);
     
     % Net heat flow in solid steel zone (sSc)
     % CO post combustion and Oxygen burner neglected
@@ -1382,7 +1382,8 @@ for step = 1:secs/ts
     dT_wall = (-Q_wallRAD + (A2/(A1+A2))*Q_gaswater - phi2*Cp_H2O*(T_wall - T_water)) ...
         / (A2*d2*rho*Cp_wall);
     
-    
+    T_sSc = T_sSc + dT_sSc * ts;
+    T_sSl = T_sSl + dT_sSl * ts;
     T_lSc = T_lSc + dT_lSc * ts;
     T_lSl = T_lSl + dT_lSl * ts;
     T_gas = T_gas + dT_gas * ts;
@@ -1392,16 +1393,12 @@ for step = 1:secs/ts
     % ======================= Phase Change =======================
     
     % Injected Carbon Dissolve Rate
-    % Needs to be verified
     dm_CL_melt = (m_CL * T_lSc * Cp_lSc * (T_air/T_melt)) / ...
         (lambda_C + Cp_C * (T_melt - T_air));
     
     % Melt rate of solid metal (kg/s)
     dm_sSc = ((Q_sSc*(T_sSc/T_melt)) / (lambda_sSc + Cp_sSc*(T_melt - T_sSc)));
-    Q_sSc = Q_sSc - dm_sSc * lambda_sSc;
-    T_sSc = T_sSc + dT_sSc * ts;
-    T_lSc = (T_lSc * m_lSc + T_melt * dm_sSc * ts) / (m_lSc + dm_sSc * ts);
-    
+    %T_lSc = (T_lSc * m_lSc + T_melt * dm_sSc * ts) / (m_lSc + dm_sSc * ts);
     m_Cr_sSc = m_Cr_sSc - (dm_sSc*MX_Cr_sSc*ts);
     m_Cr_lSc = m_Cr_lSc + (dm_sSc*MX_Cr_sSc*ts);
     m_Fe_sSc = m_Fe_sSc - (dm_sSc*MX_Fe_sSc*ts);
@@ -1430,9 +1427,8 @@ for step = 1:secs/ts
     % Melt rate of solid slag (kg/s)
     % Melt temperature of 1400C according to https://core.ac.uk/download/pdf/82678298.pdf
     dm_sSl = (Q_sSl*(T_sSl/T_melt)) / ((lambda_sSl + Cp_sSl*(T_melt - T_sSl))/M_sSl);
-    Q_sSl = Q_sSl - dm_sSl * lambda_sSl;
-    T_sSl = T_sSl + dT_sSl * ts;
-    T_lSl = (T_lSl * m_lSl + 1673 * dm_sSl * ts) / (m_lSl + dm_sSl * ts);
+    
+    %T_lSl = (T_lSl * m_lSl + 1673 * dm_sSl * ts) / (m_lSl + dm_sSl * ts);
     
     m_Al2O3_sSl = m_Al2O3_sSl - (dm_sSl*MX_Al2O3_sSl*ts);
     m_Al2O3_lSl = m_Al2O3_lSl + (dm_sSl*MX_Al2O3_sSl*ts);
@@ -1510,7 +1506,7 @@ for step = 1:secs/ts
     m_MnO_lSl = m_MnO_lSl - (r_MnO_C * M_MnO * ts);
     m_C_lSc = m_C_lSc - (r_MnO_C * M_C * ts);
     m_Mn_lSc = m_Mn_lSc + (r_MnO_C * M_Mn * ts);
-    m_CO = m_CO + (r_MnO_C * M_MnO * ts);
+    m_CO = m_CO + (r_MnO_C * M_CO * ts);
     
     % ----------- Desiliconization ----------
     
@@ -1551,27 +1547,27 @@ for step = 1:secs/ts
     
     % 3FeO + 2Cr -> 3Fe + Cr2O3
     
-    m_FeO_lSl = m_FeO_lSl - 3*(r_3FeO_2Cr * M_FeO * ts);
-    m_Cr_lSc = m_Cr_lSc - 2*(r_3FeO_2Cr * M_Cr * ts);
-    m_Fe_lSc = m_Fe_lSc + 3*(r_3FeO_2Cr * M_Fe * ts);
-    m_Cr2O3_lSl = m_Cr2O3_lSl + (r_3FeO_2Cr * M_Cr2O3 * ts);
+    m_FeO_lSl = m_FeO_lSl - 1.5*(r_3FeO_2Cr * M_FeO * ts);
+    m_Cr_lSc = m_Cr_lSc - (r_3FeO_2Cr * M_Cr * ts);
+    m_Fe_lSc = m_Fe_lSc + 1.5*(r_3FeO_2Cr * M_Fe * ts);
+    m_Cr2O3_lSl = m_Cr2O3_lSl + 0.5*(r_3FeO_2Cr * M_Cr2O3 * ts);
     
     % --------- Chromium Oxidation ---------
     
     % 2Cr + 3/2O2 -> Cr2O3
     
-    m_Cr_lSc = m_Cr_lSc - 2*(r_2Cr_3hO2 * M_Cr * ts);
-    m_Cr2O3_lSl = m_Cr2O3_lSl + (r_2Cr_3hO2 * M_Cr2O3 * ts);
+    m_Cr_lSc = m_Cr_lSc - (r_2Cr_3hO2 * M_Cr * ts);
+    m_Cr2O3_lSl = m_Cr2O3_lSl + 0.5*(r_2Cr_3hO2 * M_Cr2O3 * ts);
     m_O2 = m_O2 - 1.5*(r_2Cr_3hO2 * M_O2 * ts);
     
     % -------- Phosphorus Oxidation --------
     
     % 5FeO + 2P -> 5Fe + P2O5
     
-    m_FeO_lSl = m_FeO_lSl - 5*(r_5FeO_2P * M_FeO * ts);
-    m_P_lSc = m_P_lSc - 2*(r_5FeO_2P * M_P * ts);
-    m_Fe_lSc = m_Fe_lSc + 5*(r_5FeO_2P * M_Fe * ts);
-    m_P2O5_lSl = m_P2O5_lSl + (r_5FeO_2P * M_P2O5 * ts);
+    m_FeO_lSl = m_FeO_lSl - 2.5*(r_5FeO_2P * M_FeO * ts);
+    m_P_lSc = m_P_lSc - (r_5FeO_2P * M_P * ts);
+    m_Fe_lSc = m_Fe_lSc + 2.5*(r_5FeO_2P * M_Fe * ts);
+    m_P2O5_lSl = m_P2O5_lSl + 0.5*(r_5FeO_2P * M_P2O5 * ts);
     
     % ------------- Fe Oxidation -------------
     
@@ -1579,6 +1575,7 @@ for step = 1:secs/ts
     
     m_Fe_lSc = m_Fe_lSc - (r_Fe_hO2 * M_Fe * ts);
     m_FeO_lSl = m_FeO_lSl + (r_Fe_hO2 * M_FeO * ts);
+    m_O2 = m_O2 - 0.5*(r_Fe_hO2 * M_O2 * ts);
     
     % ------------- Combustion ---------------
     
@@ -1586,20 +1583,20 @@ for step = 1:secs/ts
     
     m_comb_sSc = m_comb_sSc - (r_comb * M_C9H20 * ts);
     m_O2 = m_O2 - 14*(r_comb * M_O2 * ts);
-    m_CO = m_CO + 9*(r_comb * M_CO2 * ts);
+    m_CO2 = m_CO2 + 9*(r_comb * M_CO2 * ts);
     m_H2O = m_H2O + 10*(r_comb * M_H2O * ts);
     
-    % ----------- Pose Combustion ------------
+    % ----------- Post Combustion ------------
     
     % CO + 1/2O2 -> CO2
     
-    m_O2 = m_O2 + (O2_post - r_post*M_O2) * ts;
+    m_O2 = m_O2 - (r_post * M_O2) * ts;
     m_CO = m_CO - 2*(r_post * M_CO * ts);
-    m_CO2 = m_CO2 + (r_post * M_CO2 * ts);
+    m_CO2 = m_CO2 + 2*(r_post * M_CO2 * ts);
     
     % --------- Electrode Oxidation ----------
     
-    % C + O2 -> CO2
+    % C + O2 -> CO2             C here is from electrode so no eq needed
     
     m_O2 = m_O2 - ((dm_el*M_O2)/M_C) * ts;
     m_CO2 = m_CO2 + ((dm_el*M_CO2)/M_C) * ts;
@@ -1646,7 +1643,10 @@ for step = 1:secs/ts
     % Oxygen Lance
     m_O2 = m_O2 + O2_lance * ts;
     
-    T_gas = (T_gas * m_gas + T_air * O2_lance * ts) / (m_gas + O2_lance * ts);
+    % Oxygen Post
+    m_O2 = m_O2 + O2_post * ts;
+    
+    T_gas = (T_gas * m_gas + T_air * O2_lance * ts + T_air * O2_post * ts) / (m_gas + O2_lance * ts + O2_post * ts);
     
     % Carbon injection
     m_CL = m_CL + (C_inj * ts);
@@ -1678,12 +1678,11 @@ for step = 1:secs/ts
     m_O2 = m_O2 - (hd*u1*MX_O2)/(k_U*u2+hd) * ts;
     m_H2O = m_H2O - (hd*u1*MX_H2O)/(k_U*u2+hd) * ts;
     
-    dm_CO = r_FeO_CL * M_CO + r_FeO_CD * M_CO + r_C_hO2 * M_CO + r_MnO_C * M_MnO ...
-        + 9*r_comb * M_CO2 - 2*r_post * M_CO;
-    dm_CO2 = r_C_O2 * M_CO2 + 9*r_comb * M_CO2 + r_post * M_CO2;
+    dm_CO = r_FeO_CL * M_CO + r_FeO_CD * M_CO + r_C_hO2 * M_CO + r_MnO_C * M_MnO - 2*r_post * M_CO;
+    dm_CO2 = r_C_O2 * M_CO2 + 9*r_comb * M_CO2 + 2*r_post * M_CO2 + dm_el* M_CO2 / M_C;
     dm_O2 = O2_lance -0.5*r_C_hO2 * M_O2 - r_C_O2 * M_O2 - r_Si_O2 * M_O2 ...
-        -1.5*r_2Cr_3hO2 * M_O2 - 14*r_comb * M_O2 + (O2_post - r_post*M_O2);
-    dm_H2O = 10*r_comb * M_H2O;
+        -1.5*r_2Cr_3hO2 * M_O2 - 14*r_comb * M_O2 + O2_post - r_post * M_O2;
+    dm_H2O = 10 * r_comb * M_H2O;
     
     rp = (R*T_gas/V_gas)*(dm_CO/M_CO + dm_CO2/M_CO2 + dm_O2/M_O2 + dm_H2O/M_H2O) ...
         + (R*dT_gas/V_gas)*(m_CO/M_CO + m_CO2/M_CO2 + m_O2/M_O2 + m_H2O/M_H2O);
