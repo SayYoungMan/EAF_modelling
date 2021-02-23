@@ -77,16 +77,16 @@ d2 = 0.45;
 % ---------- Other Settings ----------
 
 % Carbon Injection Rate (kg/s)
-C_inj = 0;
+C_inj = 0.8;
 
 % Manganese Injection Rate (kg/s)
 Mn_inj = 1.6;
 
 % Oxygen Lance Rate (kg/s)
-O2_lance = 3.2;
+O2_lance = 4.5;
 
 % O2 for post combustion (kg/s)
-O2_post = 0;
+O2_post = 0.5;
 
 % Power of arc (kW)
 P_arc = 40000;
@@ -367,7 +367,7 @@ K_O2SiO2 = 0.035;
 % Vent
 hd = 0.65;
 k_U = 6.44;
-u1 = 17;
+u1 = 20;
 u2 = 0.3;
 
 V_gas = 45;
@@ -581,10 +581,16 @@ for step = 1:secs/ts
     % To carbon monoxide
     % C + 1/2 O2 -> CO
     r_C_hO2 = (kd_C1 * (X_C_lSc - Xeq_C) * O2_lance * K_O2CO) / M_C; % Logar 2012
+    if r_C_hO2 > (O2_lance * K_O2CO) / M_C
+        r_C_hO2 = (O2_lance * K_O2CO) / M_C;
+    end
     
     % To carbon dioxide
     % C + O2 -> CO2
     r_C_O2 = (kd_C2 * (X_C_lSc - Xeq_C) * O2_lance * K_O2CO2) / M_C; % Logar 2012
+    if r_C_O2 > (O2_lance * K_O2CO2) / M_C
+        r_C_O2 = (O2_lance * K_O2CO2) / M_C;
+    end
     
     % -------- MnO decarburization ----------
     
@@ -622,9 +628,6 @@ for step = 1:secs/ts
     % Equilibrium fraction
     MXeq_Si = a_SiO2_bas / (K_Si * O_sol^2); % Turkogan 1996
     Xeq_Si = MXeq_Si * (M_Fe/(M_Si*100));
-    % Xeq_Si = ((MXeq_Si * m_lSc) / M_Si) / XM_lSc; 
-    % Xeq_Si = 8.08e-08* ((m_lSl*M_FeO)/(m_FeO_lSl*M_lSl) + (m_SiO2_lSl*M_FeO) ...
-    %     /(m_FeO_lSl*M_SiO2) + 1)^2; % Bekkar 1999
     
     if isnan(Xeq_Si)
         Xeq_Si = 0;
@@ -638,6 +641,10 @@ for step = 1:secs/ts
     % Si + O2 -> SiO2
     
     r_Si_O2 = (kd_Si2 * (X_Si_lSc - Xeq_Si) * O2_lance * K_O2SiO2) / M_Si;
+    if r_Si_O2 > (O2_lance * K_O2SiO2) / M_Si
+        r_Si_O2 = (O2_lance * K_O2SiO2) / M_Si;
+    end
+    
     
     % ------- Si reaction with MnO --------
     
@@ -697,6 +704,9 @@ for step = 1:secs/ts
     % 2Cr + 3/2O2 -> Cr2O3
     
     r_2Cr_3hO2 = (2 * kd_Cr2 * (X_Cr_lSc - Xeq_Cr) * O2_lance * K_O2Cr2O3) / M_Cr;
+    if r_2Cr_3hO2 > (O2_lance * K_O2Cr2O3) / M_Cr
+        r_2Cr_3hO2 = (O2_lance * K_O2Cr2O3) / M_Cr;
+    end
     
     % ----- Phosphorus reaction with FeO -----
     
