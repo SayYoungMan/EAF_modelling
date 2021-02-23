@@ -11715,6 +11715,9 @@ m_liquid = cat(2,m_liquid, m_liquid3);
 m_solid_slag = cat(2,m_solid_slag, m_solid_slag3);
 m_liquid_slag = cat(2,m_liquid_slag, m_liquid_slag3);
 
+% Import data points
+m_liquid_lit = readmatrix('literature data/m_liquid.csv');
+
 figure
 plot(time, gas_temp)
 hold on
@@ -11731,6 +11734,7 @@ plot(time, m_solid)
 hold on
 plot(time, m_solid_slag)
 plot(time, m_liquid)
+plot(m_liquid_lit(:,1), m_liquid_lit(:,2))
 plot(time, m_liquid_slag)
 legend('solid', 'solid slag', 'liquid', 'liquid slag')
 hold off
