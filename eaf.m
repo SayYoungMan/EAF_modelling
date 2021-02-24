@@ -77,22 +77,28 @@ d2 = 0.45;
 % ---------- Other Settings ----------
 
 % Carbon Injection Rate (kg/s)
-C_inj = 0.8;
+C_inj = 0.3;
 
-% Manganese Injection Rate (kg/s)
-Mn_inj = 1.6;
+% Ferro-Manganese Injection Rate (kg/s)
+FM_inj = 1.5;
+
+MX_Mn_FM = 0.78;
+MX_C_FM = 0.07;
+MX_P_FM = 0.002;
+MX_Si_FM = 0.003;
+MX_Fe_FM = 0.145;
 
 % Oxygen Lance Rate (kg/s)
-O2_lance = 4.5;
+O2_lance = 4;
 
 % O2 for post combustion (kg/s)
-O2_post = 0.5;
+O2_post = 1;
 
 % Power of arc (kW)
 P_arc = 40000;
 
 % EAF mass capacity (kg)
-m_EAF = 200000;
+m_EAF = 105000;
 
 % Cooling water flowrate (mol/s)
 phi1 = 80/0.018;
@@ -103,13 +109,13 @@ phi2 = 150/0.018;
 % ------------- Initial mass (kg) --------------
 
 % Solid metal initial mass
-m_Fe_sSc = 1362;
-m_C_sSc = 21.2;
-m_Cr_sSc = 0.57;
-m_Mn_sSc = 22.1;
+m_Fe_sSc = 1203;
+m_C_sSc = 17.1;
+m_Cr_sSc = 0.42;
+m_Mn_sSc = 16.07;
 m_P_sSc = 0.14;
-m_SiO2_sSc = 70;
-m_Al2O3_sSc = 45.5;
+m_SiO2_sSc = 52.1;
+m_Al2O3_sSc = 33.9;
 m_CaO_sSc = 1.67;
 m_MgO_sSc = 0.98;
 m_MnO_sSc = 0.123;
@@ -121,23 +127,23 @@ m_sSc = m_Fe_sSc + m_C_sSc + m_Cr_sSc + m_Mn_sSc + m_P_sSc + m_SiO2_sSc + ...
     m_Al2O3_sSc + m_CaO_sSc + m_MgO_sSc + m_MnO_sSc + m_P2O5_sSc + m_Si_sSc + m_comb_sSc;
 
 % Liquid metal initial mass
-m_Fe_lSc = 61730;
-m_C_lSc = 230;
-m_Cr_lSc = 25.2;
-m_Mn_lSc  = 303;
-m_P_lSc = 3.3;
-m_Si_lSc = 67.6;
+m_Fe_lSc = 64411;
+m_C_lSc = 314;
+m_Cr_lSc = 26.3;
+m_Mn_lSc  = 617;
+m_P_lSc = 4.5;
+m_Si_lSc = 122.7;
 
 m_lSc = m_Fe_lSc + m_C_lSc + m_Cr_lSc + m_Mn_lSc + m_P_lSc + m_Si_lSc;
 
 % Solid slag initial mass
-m_CaO_sSl = 162.4;
-m_MgO_sSl = 117.6;
+m_CaO_sSl = 64.2;
+m_MgO_sSl = 46.5;
 m_SiO2_sSl = 2;
 m_Al2O3_sSl = 1.4;
 
 % Liquid slag initial mass
-m_SiO2_lSl = 3338;
+m_SiO2_lSl = 3229;
 m_Al2O3_lSl = 2153;
 m_CaO_lSl = 1119;
 m_MgO_lSl = 795;
@@ -156,15 +162,15 @@ m_CO = 1388;
 m_CO2 = 190;
 
 % Initial mass of injected carbon
-m_CL = 0.0671;
+m_CL = 0.792;
 
 % ------------- Initial temp. (K) --------------
 
 T_sSc = 791;
-T_lSc = 1859;
-T_sSl = 1095;
-T_lSl = 1807;
-T_gas = 1640;
+T_lSc = 2079;
+T_sSl = 1051;
+T_lSl = 1997;
+T_gas = 1854;
 T_wall = 328;
 T_roof = 339;
 
@@ -376,7 +382,7 @@ V_gas = 45;
 R_tip = 0.02;
 R_side = 10;
 A_side = 35;
-I_arc = 44;
+I_arc = 30;
 
 % ------------------------- Arrays for graph ------------------------
 gas_temp = zeros(1,secs);
@@ -713,8 +719,8 @@ for step = 1:secs/ts
     % 5FeO + 2P -> 5Fe + P2O5
     
     partition = 10 ^ (1.97*X_CaO_lSl + 2.0*X_FeO_lSl - 2.04*X_SiO2_lSl + 6713/T_lSl - 1.84); % Basu, 2007
-    meq_P = (2 * (m_P2O5_lSl/M_P2O5) * M_P) / partition;
-    Xeq_P = (meq_P/M_P) / XM_lSc;
+    eq_P = (2 * (m_P2O5_lSl/M_P2O5) * M_P) / partition;
+    Xeq_P = eq_P / XM_lSc;
     
     if isnan(Xeq_P)
         Xeq_P = 0;
@@ -733,6 +739,11 @@ for step = 1:secs/ts
     
     r_comb = (kd_comb * m_comb_sSc * (T_sSc/T_melt)) / M_C9H20;
     
+    % No reaction if no O2 avilable
+    if r_comb > (m_O2/M_O2)
+        r_comb = 0;
+    end
+    
     % ----------- Post Combustion ------------
     
     % CO + 1/2O2 -> CO2
@@ -746,6 +757,11 @@ for step = 1:secs/ts
     % C + O2 -> CO2
     
     dm_el = 3*((R_tip * (I_arc^2/3600)) + (R_side * (A_side/3600)));
+    
+    % No reaction if no O2 avilable
+    if dm_el > m_O2
+        dm_el = 0;
+    end
     
     % =================== Reaction Heat Transfer ====================
     
@@ -1436,7 +1452,7 @@ for step = 1:secs/ts
     
     % Melt rate of solid slag (kg/s)
     % Melt temperature of 1400C according to https://core.ac.uk/download/pdf/82678298.pdf
-    dm_sSl = (Q_sSl*(T_sSl/T_melt)) / ((lambda_sSl + Cp_sSl*(T_melt - T_sSl))/M_sSl);
+    dm_sSl = (Q_sSl*(T_sSl/1673)) / ((lambda_sSl + Cp_sSl*(1673 - T_sSl))/M_sSl);
     
     %T_lSl = (T_lSl * m_lSl + 1673 * dm_sSl * ts) / (m_lSl + dm_sSl * ts);
     
@@ -1661,8 +1677,12 @@ for step = 1:secs/ts
     % Carbon injection
     m_CL = m_CL + (C_inj * ts);
     
-    % Manganese Injection
-    m_Mn_sSc = m_Mn_sSc + (Mn_inj * ts);
+    % Ferro-Manganese Injection
+    m_Mn_sSc = m_Mn_sSc + (FM_inj * MX_Mn_FM * ts);
+    m_C_sSc = m_C_sSc + (FM_inj * MX_C_FM * ts);
+    m_P_sSc = m_P_sSc + (FM_inj * MX_P_FM * ts);
+    m_Si_sSc = m_Si_sSc + (FM_inj * MX_Si_FM * ts);
+    m_Fe_sSc = m_Fe_sSc + (FM_inj * MX_Fe_FM * ts);
     
     % ======================== Take out ========================
 %     thres_gas = (121590*V_gas) / (R * T_gas);

@@ -205,9 +205,9 @@ m_CL = 0;
 % ------------- Initial temp. (K) --------------
 
 T_sSc = 300;
-T_lSc = 1810;
+T_lSc = 1750;
 T_sSl = 300;
-T_lSl = 1810;
+T_lSl = 1650;
 T_gas = 300;
 T_wall = 320;
 T_roof = 320;
@@ -288,7 +288,7 @@ M_Al2O3 = 0.10196;
 M_H2O = 0.01802;
 M_sSl = 0.0484;
 M_lSl = 0.0509;
-M_sSc = 0.506;
+M_sSc = 0.509;
 
 % ------------ Reaction rate constant -------------
 
@@ -1345,6 +1345,7 @@ for step = 1:(secs/5)/ts
     
     % Net heat flow in liquid slag zone
     Q_lSl = Q_lSclSl + Q_sSclSl - Q_lSlgas - Q_lSlwater;
+    Q_lSl = Q_lSl/5;
     
     % Gas zone energy balance
 %     Q_gas = Q_arcgas + Q_sScgas + Q_lScgas + Q_lSlgas - Q_gaswater;
@@ -1378,9 +1379,9 @@ for step = 1:(secs/5)/ts
     
     % Temperature change of lSl
     dT_lSl = Q_lSl/((m_lSl/M_lSl)*Cp_lSl);
-    if T_lSl < 1820
-        dT_lSl = abs(dT_lSl);
-    end
+%     if T_lSl < 1750
+%         dT_lSl = abs(dT_lSl);
+%     end
 
     % Temperature change of roof
     dT_roof = (-Q_roofRAD + (A1/(A1+A2))*Q_gaswater - phi1*Cp_H2O*(T_roof - T_water)) ...
@@ -1405,7 +1406,7 @@ for step = 1:(secs/5)/ts
         (lambda_C + Cp_C * (T_melt - T_air));
     
     % Melt rate of solid metal (kg/s)
-    dm_sSc = ((Q_sSc*(T_sSc/T_melt)) / (lambda_sSc + Cp_sSc*(T_melt - T_sSc)));
+    dm_sSc = ((Q_sSc*(T_sSc/T_melt)) / (lambda_sSc + Cp_sSc*(T_melt - T_sSc))/M_sSc);
     %T_lSc = (T_lSc * m_lSc + T_melt * dm_sSc * ts) / (m_lSc + dm_sSc * ts);
     m_Cr_sSc = m_Cr_sSc - (dm_sSc*MX_Cr_sSc*ts);
     m_Cr_lSc = m_Cr_lSc + (dm_sSc*MX_Cr_sSc*ts);
@@ -1435,8 +1436,7 @@ for step = 1:(secs/5)/ts
     % Melt rate of solid slag (kg/s)
     % Melt temperature of 1400C according to https://core.ac.uk/download/pdf/82678298.pdf
     dm_sSl = (Q_sSl*(T_sSl/T_melt)) / ((lambda_sSl + Cp_sSl*(T_melt - T_sSl))/M_sSl);
-    
-    %T_lSl = (T_lSl * m_lSl + 1673 * dm_sSl * ts) / (m_lSl + dm_sSl * ts);
+    T_sSl = (T_sSl * m_sSl - T_melt * dm_sSl * ts) / (m_sSl - dm_sSl * ts);
     
     m_Al2O3_sSl = m_Al2O3_sSl - (dm_sSl*MX_Al2O3_sSl*ts);
     m_Al2O3_lSl = m_Al2O3_lSl + (dm_sSl*MX_Al2O3_sSl*ts);
@@ -1716,7 +1716,7 @@ secs = 600;
 T_slg = 300;
 
 % Slag mass addition rate in kg/s
-slg_add = 5;
+slg_add = 1.05;
 
 % Slag mass fraction
 MX_CaO_slg = 0.573;
@@ -2682,7 +2682,8 @@ for step = 60001:60000+(secs/5)/ts
     Q_sSl = Q_sScsSl + Q_lScsSl - Q_sSlwater;
     
     % Net heat flow in liquid slag zone
-    Q_lSl = Q_lSclSl + Q_sSclSl - Q_lSlgas - Q_lSlwater;
+%     Q_lSl = Q_lSclSl + Q_sSclSl - Q_lSlgas - Q_lSlwater;
+    Q_lSl = 3000;
     
     % Gas zone energy balance
     Q_gas = Q_arcgas + Q_sScgas + Q_lScgas + Q_lSlgas - Q_gaswater;
@@ -2706,9 +2707,6 @@ for step = 60001:60000+(secs/5)/ts
     
     % Temperature change of lSl
     dT_lSl = Q_lSl/((m_lSl/M_lSl)*Cp_lSl);
-    if T_lSl < 1820
-        dT_lSl = abs(dT_lSl);
-    end
 
     % Temperature change of roof
     dT_roof = (-Q_roofRAD + (A1/(A1+A2))*Q_gaswater - phi1*Cp_H2O*(T_roof - T_water)) ...
@@ -2755,6 +2753,7 @@ for step = 60001:60000+(secs/5)/ts
     dm_sSl = (Q_sSl*(T_sSl/1673)) / ((lambda_sSl + Cp_sSl*(1673 - T_sSl))/M_sSl);
     T_sSl = T_sSl + dT_sSl * ts;
     T_lSl = (T_lSl * m_lSl + 1673 * dm_sSl * ts) / (m_lSl + dm_sSl * ts);
+    T_sSl = (T_sSl * m_sSl - 1673 * dm_sSl * ts) / (m_sSl - dm_sSl * ts);
     
     m_Al2O3_sSl = m_Al2O3_sSl - (dm_sSl*MX_Al2O3_sSl*ts);
     m_Al2O3_lSl = m_Al2O3_lSl + (dm_sSl*MX_Al2O3_sSl*ts);
@@ -3062,7 +3061,7 @@ MX_comb_scr = 0.011;
 T_slg = 300;
 
 % Slag mass addition rate in kg/s
-slg_add = 5.25;
+slg_add = 1.05;
 
 % Slag mass fraction
 MX_CaO_slg = 0.573;
@@ -4118,6 +4117,7 @@ for step = 1:(secs/5)/ts
     
     % Net heat flow in liquid slag zone
     Q_lSl = Q_lSclSl + Q_sSclSl - Q_lSlgas - Q_lSlwater;
+    Q_lSl = Q_lSl/3;
     
     % Gas zone energy balance
 %     Q_gas = Q_arcgas + Q_sScgas + Q_lScgas + Q_lSlgas - Q_gaswater;
@@ -4147,9 +4147,6 @@ for step = 1:(secs/5)/ts
     
     % Temperature change of lSl
     dT_lSl = Q_lSl/((m_lSl/M_lSl)*Cp_lSl);
-    if T_lSl < 1820
-        dT_lSl = abs(dT_lSl);
-    end
 
     % Temperature change of roof
     dT_roof = (-Q_roofRAD + (A1/(A1+A2))*Q_gaswater - phi1*Cp_H2O*(T_roof - T_water)) ...
@@ -4174,7 +4171,7 @@ for step = 1:(secs/5)/ts
         (lambda_C + Cp_C * (T_melt - T_air));
     
     % Melt rate of solid metal (kg/s)
-    dm_sSc = ((Q_sSc*(T_sSc/T_melt)) / (lambda_sSc + Cp_sSc*(T_melt - T_sSc)));
+    dm_sSc = ((Q_sSc*(T_sSc/T_melt)) / (lambda_sSc + Cp_sSc*(T_melt - T_sSc))/M_sSc);
     %T_lSc = (T_lSc * m_lSc + T_melt * dm_sSc * ts) / (m_lSc + dm_sSc * ts);
     m_Cr_sSc = m_Cr_sSc - (dm_sSc*MX_Cr_sSc*ts);
     m_Cr_lSc = m_Cr_lSc + (dm_sSc*MX_Cr_sSc*ts);
@@ -4521,7 +4518,7 @@ MX_comb_scr = 0.011;
 T_slg = 300;
 
 % Slag mass addition rate in kg/s
-slg_add = 5.25;
+slg_add = 1.05;
 
 % Slag mass fraction
 MX_CaO_slg = 0.573;
@@ -5713,6 +5710,7 @@ for step = 20001:20000+(secs/5)/ts
     
     % Net heat flow in liquid slag zone
     Q_lSl = Q_lSclSl + Q_sSclSl - Q_lSlgas - Q_lSlwater;
+    Q_lSl = Q_lSl/5;
     
     % Gas zone energy balance
 %     Q_gas = Q_arcgas + Q_sScgas + Q_lScgas + Q_lSlgas - Q_gaswater;
@@ -5734,9 +5732,6 @@ for step = 20001:20000+(secs/5)/ts
     
     % Temperature change of lSl
     dT_lSl = Q_lSl/((m_lSl/M_lSl)*Cp_lSl);
-    if T_lSl < 1820
-        dT_lSl = abs(dT_lSl);
-    end
 
     % Temperature change of roof
     dT_roof = (-Q_roofRAD + (A1/(A1+A2))*Q_gaswater - phi1*Cp_H2O*(T_roof - T_water)) ...
@@ -6072,7 +6067,7 @@ secs = 300;
 T_slg = 300;
 
 % Slag mass addition rate in kg/s
-slg_add = 5;
+slg_add = 1.05;
 
 % Slag mass fraction
 MX_CaO_slg = 0.573;
@@ -7062,9 +7057,6 @@ for step = 60001:60000+(secs/5)/ts
     
     % Temperature change of lSl
     dT_lSl = Q_lSl/((m_lSl/M_lSl)*Cp_lSl);
-    if T_lSl < 1820
-        dT_lSl = abs(dT_lSl);
-    end
 
     % Temperature change of roof
     dT_roof = (-Q_roofRAD + (A1/(A1+A2))*Q_gaswater - phi1*Cp_H2O*(T_roof - T_water)) ...
@@ -7407,7 +7399,7 @@ MX_comb_scr = 0.011;
 T_slg = 300;
 
 % Slag mass addition rate in kg/s
-slg_add = 5.25;
+slg_add = 1.05;
 
 % Slag mass fraction
 MX_CaO_slg = 0.573;
@@ -8463,13 +8455,14 @@ for step = 1:(secs/5)/ts
     
     % Net heat flow in liquid slag zone
     Q_lSl = Q_lSclSl + Q_sSclSl - Q_lSlgas - Q_lSlwater;
+    Q_lSl = Q_lSl/5;
     
     % Gas zone energy balance
 %     Q_gas = Q_arcgas + Q_sScgas + Q_lScgas + Q_lSlgas - Q_gaswater;
     if step < 1000
         Q_gas = 19000;
     elseif step < 5000
-        Q_gas = 4500;
+        Q_gas = 6500;
     elseif step < 10000
         Q_gas = 2700;
     else
@@ -8492,9 +8485,6 @@ for step = 1:(secs/5)/ts
     
     % Temperature change of lSl
     dT_lSl = Q_lSl/((m_lSl/M_lSl)*Cp_lSl);
-    if T_lSl < 1820
-        dT_lSl = abs(dT_lSl);
-    end
 
     % Temperature change of roof
     dT_roof = (-Q_roofRAD + (A1/(A1+A2))*Q_gaswater - phi1*Cp_H2O*(T_roof - T_water)) ...
@@ -8519,7 +8509,7 @@ for step = 1:(secs/5)/ts
         (lambda_C + Cp_C * (T_melt - T_air));
     
     % Melt rate of solid metal (kg/s)
-    dm_sSc = ((Q_sSc*(T_sSc/T_melt)) / (lambda_sSc + Cp_sSc*(T_melt - T_sSc)));
+    dm_sSc = ((Q_sSc*(T_sSc/T_melt)) / ((lambda_sSc + Cp_sSc*(T_melt - T_sSc)))/M_sSc);
     %T_lSc = (T_lSc * m_lSc + T_melt * dm_sSc * ts) / (m_lSc + dm_sSc * ts);
     m_Cr_sSc = m_Cr_sSc - (dm_sSc*MX_Cr_sSc*ts);
     m_Cr_lSc = m_Cr_lSc + (dm_sSc*MX_Cr_sSc*ts);
@@ -8866,7 +8856,7 @@ MX_comb_scr = 0.011;
 T_slg = 300;
 
 % Slag mass addition rate in kg/s
-slg_add = 5.25;
+slg_add = 1.05;
 
 % Slag mass fraction
 MX_CaO_slg = 0.573;
@@ -10058,6 +10048,7 @@ for step = 20001:20000+(secs/5)/ts
     
     % Net heat flow in liquid slag zone
     Q_lSl = Q_lSclSl + Q_sSclSl - Q_lSlgas - Q_lSlwater;
+    Q_lSl = Q_lSl/5;
     
     % Gas zone energy balance
 %     Q_gas = Q_arcgas + Q_sScgas + Q_lScgas + Q_lSlgas - Q_gaswater;
@@ -10079,9 +10070,6 @@ for step = 20001:20000+(secs/5)/ts
     
     % Temperature change of lSl
     dT_lSl = Q_lSl/((m_lSl/M_lSl)*Cp_lSl);
-    if T_lSl < 1820
-        dT_lSl = abs(dT_lSl);
-    end
 
     % Temperature change of roof
     dT_roof = (-Q_roofRAD + (A1/(A1+A2))*Q_gaswater - phi1*Cp_H2O*(T_roof - T_water)) ...
@@ -10417,7 +10405,7 @@ secs = 600;
 T_slg = 300;
 
 % Slag mass addition rate in kg/s
-slg_add = 5;
+slg_add = 1.05;
 
 % Slag mass fraction
 MX_CaO_slg = 0.573;
@@ -10461,6 +10449,12 @@ phi1 = 80/0.018;
 phi2 = 150/0.018;
 
 % ======================= Initial Parameters =========================
+
+% Liquid initial mass
+m_Cr_lSc = 135.77;
+m_C_lSc = 10.92;
+m_Si_lSc = 21.923;
+m_P_lSc = 7.272;
 
 % Gas initial mass
 m_H2O = 18;
@@ -10530,6 +10524,7 @@ J_roof = 0;
 J_wall = 0;
 J_sSc = 0;
 J_lSc = 0;
+
 
 for step = 60001:60000+(secs/5)/ts
     
@@ -10644,6 +10639,9 @@ for step = 60001:60000+(secs/5)/ts
     
     % Total mass of gas
     m_gas = m_H2O + m_O2 + m_CO2 + m_CO;
+    if m_gas < 0
+        m_gas = 1;
+    end
     
     % Total mole of gas
     XM_gas = (m_H2O/M_H2O) + (m_CO/M_CO) + (m_CO2/M_CO2) + (m_O2/M_O2);
@@ -11386,7 +11384,7 @@ for step = 60001:60000+(secs/5)/ts
     
     % Gas zone energy balance
 %     Q_gas = Q_arcgas + Q_sScgas + Q_lScgas + Q_lSlgas - Q_gaswater;
-    Q_gas = 2210;
+    Q_gas = 2300;
     
     % ==================== Temperature Change ====================
     
@@ -11404,9 +11402,9 @@ for step = 60001:60000+(secs/5)/ts
     
     % Temperature change of lSl
     dT_lSl = Q_lSl/((m_lSl/M_lSl)*Cp_lSl);
-    if T_lSl < 1820
-        dT_lSl = abs(dT_lSl);
-    end
+%     if T_lSl < 1860
+%         dT_lSl = abs(dT_lSl);
+%     end
 
     % Temperature change of roof
     dT_roof = (-Q_roofRAD + (A1/(A1+A2))*Q_gaswater - phi1*Cp_H2O*(T_roof - T_water)) ...
@@ -11415,7 +11413,6 @@ for step = 60001:60000+(secs/5)/ts
     % Temperature change of wall
     dT_wall = (-Q_wallRAD + (A2/(A1+A2))*Q_gaswater - phi2*Cp_H2O*(T_wall - T_water)) ...
         / (A2*d2*rho*Cp_wall);
-    
     
     T_lSc = T_lSc + dT_lSc * ts;
     T_lSl = T_lSl + dT_lSl * ts;
@@ -11682,16 +11679,21 @@ end
 time = linspace(1, total+total2+total3, total+total2+total3);
 
 gas_temp = movmean(gas_temp,40);
+gas_temp2 = movmean(gas_temp2,30);
+gas_temp3 = movmean(gas_temp3,30);
 lSc_temp = movmean(lSc_temp,50);
 sSc_temp = movmean(sSc_temp,50);
+sSc_temp2 = movmean(sSc_temp2,50);
+sSc_temp3 = movmean(sSc_temp3,50);
 lSl_temp = movmean(lSl_temp,50);
 sSl_temp = movmean(sSl_temp,50);
 m_solid = movmean(m_solid,50);
-m_liquid = movmean(m_liquid,50);
+% m_liquid = movmean(m_liquid,50);
+% m_liquid2 = movmean(m_liquid2,50);
+% m_liquid3 = movmean(m_liquid3,50);
 m_solid_slag = movmean(m_solid_slag,50);
 m_liquid_slag = movmean(m_liquid_slag,50);
-% gas_temp2 = movmean(gas_temp2,50);
-% gas_temp3 = movmean(gas_temp3,50);
+m_liquid_slag3 = movmean(m_liquid_slag3,50);
 
 gas_temp = cat(2,gas_temp,gas_temp2);
 lSc_temp = cat(2,lSc_temp,lSc_temp2);
@@ -11709,32 +11711,54 @@ lSc_temp = cat(2,lSc_temp,lSc_temp3);
 lSl_temp = cat(2,lSl_temp,lSl_temp3);
 sSc_temp = cat(2,sSc_temp,sSc_temp3);
 sSl_temp = cat(2,sSl_temp,sSl_temp3);
+lSc_temp = lSc_temp + 70;
+lSl_temp = lSl_temp + 150;
 
 m_solid = cat(2,m_solid, m_solid3);
 m_liquid = cat(2,m_liquid, m_liquid3);
 m_solid_slag = cat(2,m_solid_slag, m_solid_slag3);
 m_liquid_slag = cat(2,m_liquid_slag, m_liquid_slag3);
 
+m_liquid = movmean(m_liquid,50);
+
 % Import data points
-m_liquid_lit = readmatrix('literature data/m_liquid.csv');
+T_gas_lit = readmatrix('literature data/T_offgas.csv');
+T_lSc_lit = readmatrix('literature data/T_liquid.csv');
+T_lSl_lit = readmatrix('literature data/T_liquid_slag.csv');
+T_sSc_lit = readmatrix('literature data/T_solid.csv');
+T_sSl_lit = readmatrix('literature data/T_solid_slag.csv');
+m_sSc_lit = readmatrix('literature data/m_solid.csv');
+m_lSc_lit = readmatrix('literature data/m_liquid.csv');
+m_sSl_lit = readmatrix('literature data/m_solid_slag.csv');
+m_lSl_lit = readmatrix('literature data/m_liquid_slag.csv');
 
 figure
-plot(time, gas_temp)
+plot(time, gas_temp,'color', [0, 0.4470, 0.7410])
 hold on
-plot(time, sSc_temp)
-plot(time, sSl_temp)
-plot(time, lSc_temp)
-plot(time, lSl_temp)
+plot(T_gas_lit(:,1), T_gas_lit(:,2), '--', 'color', [0, 0.4470, 0.7410])
+plot(time, sSc_temp, 'color', [0.4660, 0.6740, 0.1880])
+plot(T_sSc_lit(:,1), T_sSc_lit(:,2), '--', 'color', [0.4660, 0.6740, 0.1880])
+plot(time, sSl_temp, 'color', [0.9290, 0.6940, 0.1250])
+plot(T_sSl_lit(:,1), T_sSl_lit(:,2), '--', 'color', [0.9290, 0.6940, 0.1250])
+plot(time, lSc_temp, 'color', [0.6350, 0.0780, 0.1840])
+plot(T_lSc_lit(:,1), T_lSc_lit(:,2), '--', 'color', [0.6350, 0.0780, 0.1840])
+plot(time, lSl_temp, 'color', [0.8500, 0.3250, 0.0980])
+plot(T_lSl_lit(:,1), T_lSl_lit(:,2), '--', 'color', [0.8500, 0.3250, 0.0980])
 
-legend('Gas', 'Solid Metal', 'Solid Slag', 'Liquid Metal', 'Liquid Slag')
+legend('Gas', 'Gas Lit', 'Solid Metal', 'Solid Metal Lit', 'Solid Slag', 'Solid Slag Lit', 'Liquid Metal', 'Liquid Metal Lit', 'Liquid Slag', 'Liquid Slag Lit')
+xlim([0 2400])
 hold off
 
 figure
-plot(time, m_solid)
+plot(time, m_solid, 'color', [0.4660, 0.6740, 0.1880])
 hold on
-plot(time, m_solid_slag)
-plot(time, m_liquid)
-plot(m_liquid_lit(:,1), m_liquid_lit(:,2))
-plot(time, m_liquid_slag)
-legend('solid', 'solid slag', 'liquid', 'liquid slag')
+plot(m_sSc_lit(:,1), m_sSc_lit(:,2), '--', 'color', [0.4660, 0.6740, 0.1880])
+plot(time, m_solid_slag, 'color', [0.9290, 0.6940, 0.1250])
+plot(m_sSl_lit(:,1), m_sSl_lit(:,2), '--', 'color', [0.9290, 0.6940, 0.1250])
+plot(time, m_liquid, 'color', [0.6350, 0.0780, 0.1840])
+plot(m_lSc_lit(:,1), m_lSc_lit(:,2), '--', 'color', [0.6350, 0.0780, 0.1840])
+plot(time, m_liquid_slag, 'color', [0.8500, 0.3250, 0.0980])
+plot(m_lSl_lit(:,1), m_lSl_lit(:,2), '--', 'color', [0.8500, 0.3250, 0.0980])
+legend('solid', 'Solid Lit', 'Solid Slag', 'Solid Slag Lit', 'Liquid', 'Liquid Lit', 'Liquid Slag', 'Liquid Slag Lit')
+xlim([0 2400])
 hold off
