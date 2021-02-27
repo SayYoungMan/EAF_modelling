@@ -1,6 +1,10 @@
 clear
 clc
 
+kpi = zeros(5, 12);
+change = linspace(0.8, 1.2, 5);
+
+for i = 1:length(change)
 % ========================== Control Panel ===========================
 
 % ---------- Time Settings ----------
@@ -55,7 +59,7 @@ MX_comb_scr = 0.011;
 T_slg = 300;
 
 % Slag mass addition rate in kg/s
-slg_add = 3;
+slg_add = 3*change(i);
 
 % Slag mass fraction
 MX_CaO_slg = 0.573;
@@ -1051,7 +1055,7 @@ for step = 1:secs/ts
         5*CpdT_Fe + CpdT_P2O5 - 5*CpdT_FeO - 2*CpdT_P);
 
     % g) C + 1/2O2 -> CO
-    dH_Tg = r_C_hO2 * ((dH_CO-dH_CS) + CpdT_CO_lSc - CpdT_C - CpdT_O2_lSc);
+    dH_Tg = r_C_hO2 * ((dH_CO-dH_CS) + CpdT_CO_lSc - CpdT_C - 0.5*CpdT_O2_lSc);
 
     % h) CO + 1/2O2 -> CO2
     dH_Th = r_post * ((dH_CO2-dH_CO) + CpdT_CO2_gas - CpdT_CO_gas - 0.5*CpdT_O2_gas);
@@ -1758,36 +1762,52 @@ for step = 1:secs/ts
     
 end
 
-% Graph generation
-time = linspace(1, secs, secs);
+kpi(i,1) = MX_C_lSc*100;
+kpi(i,2) = MX_Mn_lSc*100;
+kpi(i,3) = A_eaf * h_eafup + A_bath * h_eaflow;
+kpi(i,4) = C_inj;
+kpi(i,5) = FM_inj;
+kpi(i,6) = O2_lance + O2_post;
+kpi(i,7) = P_arc/1000;
+kpi(i,8) = slg_add;
+kpi(i,9) = T_lSc;
+kpi(i,10) = (m_Fe_lSc/M_Fe)/(m_FeO_lSl/M_FeO);
+kpi(i,11) = ((((DRI_add + slg_add + scr_add + O2_lance + O2_post + C_inj + FM_inj)*out ...
+    - (m_lSc + m_lSl)/2)) * (MX_CO + MX_CO2)) / out;
+kpi(i,12) = MX_CO2/MX_CO;
+kpi(i,13) = m_sSc;
+end
 
-figure
-plot(time, gas_temp)
-hold on
-plot(time, sSc_temp)
-plot(time, sSl_temp)
-plot(time, lSc_temp)
-plot(time, lSl_temp)
-
-legend('Gas', 'Solid Metal', 'Solid Slag', 'Liquid Metal', 'Liquid Slag')
-hold off
-
+% % Graph generation
+% time = linspace(1, secs, secs);
+% 
 % figure
-% plot(time, steel_Fe)
-
+% plot(time, gas_temp)
+% hold on
+% plot(time, sSc_temp)
+% plot(time, sSl_temp)
+% plot(time, lSc_temp)
+% plot(time, lSl_temp)
+% 
+% legend('Gas', 'Solid Metal', 'Solid Slag', 'Liquid Metal', 'Liquid Slag')
+% hold off
+% 
+% % figure
+% % plot(time, steel_Fe)
+% 
+% % figure
+% % plot(time, rel_pres)
+% 
 % figure
-% plot(time, rel_pres)
-
-figure
-plot(time, m_solid)
-hold on
-plot(time, m_solid_slag)
-legend('solid', 'solid slag')
-hold off
-
-figure
-plot(time, m_liquid)
-hold on
-plot(time, m_liquid_slag)
-legend('liquid', 'liquid slag')
-hold off
+% plot(time, m_solid)
+% hold on
+% plot(time, m_solid_slag)
+% legend('solid', 'solid slag')
+% hold off
+% 
+% figure
+% plot(time, m_liquid)
+% hold on
+% plot(time, m_liquid_slag)
+% legend('liquid', 'liquid slag')
+% hold off

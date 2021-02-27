@@ -7337,13 +7337,13 @@ end
 % ====================================================================
 
 
-m_Fe_sSc = (m_Fe_sSc + 24262.5) * 0.8;
-m_C_sSc = (m_C_sSc + 100) * 0.8;
-m_Si_sSc = (m_Si_sSc + 150) * 0.8;
-m_Cr_sSc = (m_Cr_sSc + 50) * 0.8;
-m_P_sSc = (m_P_sSc + 12.5) * 0.8;
-m_Mn_sSc = (m_Mn_sSc + 150) * 0.8;
-m_comb_sSc = (m_comb_sSc + 275) * 0.8;
+m_Fe_sSc = m_Fe_sSc + 24262.5 * 0.8;
+m_C_sSc = m_C_sSc + 100 * 0.8;
+m_Si_sSc = m_Si_sSc + 150 * 0.8;
+m_Cr_sSc = m_Cr_sSc + 50 * 0.8;
+m_P_sSc = m_P_sSc + 12.5 * 0.8;
+m_Mn_sSc = m_Mn_sSc + 150 * 0.8;
+m_comb_sSc = m_comb_sSc + 275 * 0.8;
 
 T_sSc = 300;
 T_gas = 300;
@@ -10453,7 +10453,7 @@ phi2 = 150/0.018;
 % Liquid initial mass
 m_Cr_lSc = 135.77;
 m_C_lSc = 10.92;
-m_Si_lSc = 21.923;
+m_Si_lSc = 25.923;
 m_P_lSc = 7.272;
 
 % Gas initial mass
@@ -11643,6 +11643,7 @@ for step = 60001:60000+(secs/5)/ts
     
     % Manganese Injection
     m_Mn_sSc = m_Mn_sSc + (Mn_inj * ts);
+    m_Fe_lSc = m_Fe_lSc + (18.2 * ts);
     
     % Off gas venting
     m_CO = m_CO - (hd*u1*MX_CO)/(k_U*u2+hd) * ts;
@@ -11733,32 +11734,32 @@ m_sSl_lit = readmatrix('literature data/m_solid_slag.csv');
 m_lSl_lit = readmatrix('literature data/m_liquid_slag.csv');
 
 figure
-plot(time, gas_temp,'color', [0, 0.4470, 0.7410])
+plot(time, gas_temp,'color', [0, 0.4470, 0.7410], 'LineWidth', 1.5)
 hold on
-plot(T_gas_lit(:,1), T_gas_lit(:,2), '--', 'color', [0, 0.4470, 0.7410])
-plot(time, sSc_temp, 'color', [0.4660, 0.6740, 0.1880])
-plot(T_sSc_lit(:,1), T_sSc_lit(:,2), '--', 'color', [0.4660, 0.6740, 0.1880])
-plot(time, sSl_temp, 'color', [0.9290, 0.6940, 0.1250])
-plot(T_sSl_lit(:,1), T_sSl_lit(:,2), '--', 'color', [0.9290, 0.6940, 0.1250])
-plot(time, lSc_temp, 'color', [0.6350, 0.0780, 0.1840])
-plot(T_lSc_lit(:,1), T_lSc_lit(:,2), '--', 'color', [0.6350, 0.0780, 0.1840])
-plot(time, lSl_temp, 'color', [0.8500, 0.3250, 0.0980])
-plot(T_lSl_lit(:,1), T_lSl_lit(:,2), '--', 'color', [0.8500, 0.3250, 0.0980])
+plot(T_gas_lit(:,1), T_gas_lit(:,2), '--', 'color', [0, 0.4470, 0.7410], 'LineWidth', 1.5)
+plot(time, sSc_temp, 'color', [0.4660, 0.6740, 0.1880], 'LineWidth', 1.5)
+plot(T_sSc_lit(:,1), T_sSc_lit(:,2), '--', 'color', [0.4660, 0.6740, 0.1880], 'LineWidth', 1.5)
+plot(time, sSl_temp, 'color', [0.9290, 0.6940, 0.1250], 'LineWidth', 1.5)
+plot(T_sSl_lit(:,1), T_sSl_lit(:,2), '--', 'color', [0.9290, 0.6940, 0.1250], 'LineWidth', 1.5)
+plot(time, lSc_temp, 'color', [0.6350, 0.0780, 0.1840], 'LineWidth', 1.5)
+plot(T_lSc_lit(:,1), T_lSc_lit(:,2), '--', 'color', [0.6350, 0.0780, 0.1840], 'LineWidth', 1.5)
+plot(time, lSl_temp, 'color', [0.25, 0.25, 0.25], 'LineWidth', 1.5)
+plot(T_lSl_lit(:,1), T_lSl_lit(:,2), '--', 'color', [0.25, 0.25, 0.25], 'LineWidth', 1.5)
 
 legend('Gas', 'Gas Lit', 'Solid Metal', 'Solid Metal Lit', 'Solid Slag', 'Solid Slag Lit', 'Liquid Metal', 'Liquid Metal Lit', 'Liquid Slag', 'Liquid Slag Lit')
 xlim([0 2400])
 hold off
 
 figure
-plot(time, m_solid, 'color', [0.4660, 0.6740, 0.1880])
+plot(time, m_solid, 'color', [0.4660, 0.6740, 0.1880], 'LineWidth', 1.5)
 hold on
-plot(m_sSc_lit(:,1), m_sSc_lit(:,2), '--', 'color', [0.4660, 0.6740, 0.1880])
-plot(time, m_solid_slag, 'color', [0.9290, 0.6940, 0.1250])
-plot(m_sSl_lit(:,1), m_sSl_lit(:,2), '--', 'color', [0.9290, 0.6940, 0.1250])
-plot(time, m_liquid, 'color', [0.6350, 0.0780, 0.1840])
-plot(m_lSc_lit(:,1), m_lSc_lit(:,2), '--', 'color', [0.6350, 0.0780, 0.1840])
-plot(time, m_liquid_slag, 'color', [0.8500, 0.3250, 0.0980])
-plot(m_lSl_lit(:,1), m_lSl_lit(:,2), '--', 'color', [0.8500, 0.3250, 0.0980])
+plot(m_sSc_lit(:,1), m_sSc_lit(:,2), '--', 'color', [0.4660, 0.6740, 0.1880], 'LineWidth', 1.5)
+plot(time, m_solid_slag, 'color', [0.9290, 0.6940, 0.1250], 'LineWidth', 1.5)
+plot(m_sSl_lit(:,1), m_sSl_lit(:,2), '--', 'color', [0.9290, 0.6940, 0.1250], 'LineWidth', 1.5)
+plot(time, m_liquid, 'color', [0.6350, 0.0780, 0.1840], 'LineWidth', 1.5)
+plot(m_lSc_lit(:,1), m_lSc_lit(:,2), '--', 'color', [0.6350, 0.0780, 0.1840], 'LineWidth', 1.5)
+plot(time, m_liquid_slag, 'color', [0.25, 0.25, 0.25], 'LineWidth', 1.5)
+plot(m_lSl_lit(:,1), m_lSl_lit(:,2), '--', 'color', [0.25, 0.25, 0.25], 'LineWidth', 1.5)
 legend('solid', 'Solid Lit', 'Solid Slag', 'Solid Slag Lit', 'Liquid', 'Liquid Lit', 'Liquid Slag', 'Liquid Slag Lit')
 xlim([0 2400])
 hold off
