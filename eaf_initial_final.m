@@ -98,7 +98,7 @@ O2_post = 1;
 P_arc = 40000;
 
 % EAF mass capacity (kg)
-m_EAF = 105000;
+m_EAF = 200000;
 
 % Cooling water flowrate (mol/s)
 phi1 = 80/0.018;

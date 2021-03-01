@@ -357,7 +357,7 @@ ep4 = 0.40; % lSc
 
 % ------------ Constant Temperatures --------------
 
-T_air = 298;
+T_air = 571;
 T_melt = 1809;
 T_water = 298;
 

@@ -11748,6 +11748,8 @@ plot(T_lSl_lit(:,1), T_lSl_lit(:,2), '--', 'color', [0.25, 0.25, 0.25], 'LineWid
 
 legend('Gas', 'Gas Lit', 'Solid Metal', 'Solid Metal Lit', 'Solid Slag', 'Solid Slag Lit', 'Liquid Metal', 'Liquid Metal Lit', 'Liquid Slag', 'Liquid Slag Lit')
 xlim([0 2400])
+xlabel('Time (s)')
+ylabel('Temperature (K)')
 hold off
 
 figure
@@ -11762,4 +11764,6 @@ plot(time, m_liquid_slag, 'color', [0.25, 0.25, 0.25], 'LineWidth', 1.5)
 plot(m_lSl_lit(:,1), m_lSl_lit(:,2), '--', 'color', [0.25, 0.25, 0.25], 'LineWidth', 1.5)
 legend('solid', 'Solid Lit', 'Solid Slag', 'Solid Slag Lit', 'Liquid', 'Liquid Lit', 'Liquid Slag', 'Liquid Slag Lit')
 xlim([0 2400])
+xlabel('Time (s)')
+ylabel('Mass (kg)')
 hold off
