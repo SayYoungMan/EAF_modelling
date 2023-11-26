@@ -106,3 +106,26 @@ Accounting for a continuous solid metal feed with semi-continuous tapping cycles
 24. J. G. Bekker, I. K. Craig, and P. C. Pistorius, “Modeling and Simulation of an Electric Arc Furnace Process”, ISIJ International, vol. 39, no. 1, pp. 23–32, 1999.
 25. M. Meraikib, “Activity of Silica in the Slag of an Electric Arc Furnace Using Direct Reduced lron for Steelmaking”, Tech. Rep. 1, 1995, pp. 845–850.
 26. S. Basu, A. K. Lahiri, and S. Seetharaman, “Phosphorus partition between liquid steel and CaO-SiO2-P 2O5-MgO slag containing low FeO”, Metallurgical and Materials Transactions B: Process Metallurgy and Materials Processing Science, vol. 38, no. 3, pp. 357–366, Jun. 2007.
+
+## Acknowledgement
+
+Special thanks to teammates of Colosseum Steelworks:
+
+- Aiman Syahirah Ahmad Dzulfakhar
+- Theeranai (Bek) Charaschanya
+- Athanasios (Thanos) Charos
+- Naomi Duru
+- Fatima Elzahra Khan
+- En You Sim
+- Alessandro Tonus
+- Pierre Walker
+- Richard Woolley
+
+Also, thank you very much to supervisors who helped us throughout the process
+
+- [Jason P. Hallet](https://www.imperial.ac.uk/people/j.hallett)
+- [Paul Fennell](https://www.imperial.ac.uk/people/p.fennell)
+
+## Change Log
+
+- 2023-11-25: Added proper READMEs and remove unnecessary files from the repo.
